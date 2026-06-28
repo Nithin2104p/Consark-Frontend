@@ -1,0 +1,353 @@
+/* ===== EMPLOYEES LIST PAGE ===== */
+.employees-list {
+  padding: 24px;
+}
+
+.employees-list h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.page-desc {
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ===== TABLE ===== */
+.employees-table {
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ===== PAGINATION (Goals styling, employee-specific class names) ===== */
+.employees-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.employees-pagination-btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.employees-pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.employees-pagination-btn:not(:disabled):hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.35);
+  color: #e0c3fc;
+}
+
+.employees-pagination-pages {
+  display: flex;
+  gap: 8px;
+}
+
+.employees-pagination-page-btn {
+  width: 34px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.employees-pagination-page-btn.active {
+  background: rgba(139, 92, 246, 0.22);
+  border-color: rgba(139, 92, 246, 0.45);
+  color: #e0c3fc;
+}
+
+
+/* ===== ROW ===== */
+.table-row-employee {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr;
+  gap: 12px;
+  min-width: 100%;
+  padding: 16px 20px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(139, 92, 246, 0.08);
+  transition: background 0.2s ease, transform 0.05s ease;
+  cursor: pointer;
+}
+
+.table-row-employee.is-selected {
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.table-header-employee {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  font-size: 12px;
+
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.table-row-employee:hover {
+  background: rgba(180, 169, 206, 0.08);
+}
+
+.table-row-employee:last-child {
+  border-bottom: none;
+}
+
+/* ===== AVATAR ===== */
+.col-avatar {
+  display: flex;
+  align-items: center;
+  max-width: 50px;
+}
+
+.employee-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  transition: border-color 0.2s ease;
+}
+
+.table-row-employee:hover .employee-avatar {
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+/* ===== EMPLOYEE TEXT COLUMNS ===== */
+.col-name,
+.col-email,
+.col-manager {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: flex-start;
+  /* add this */
+  text-align: left;
+  /* add this */
+}
+
+.col-email {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-manager {
+  color: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== DEPARTMENT ===== */
+.col-department {
+  display: flex;
+  align-items: center;
+}
+
+.department-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ===== SIDEBAR ===== */
+.employees-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+.employee-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(440px, 100%);
+  padding: 28px;
+  background: rgba(8, 15, 38, 0.98);
+  box-shadow: -24px 0 80px rgba(0, 0, 0, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: auto;
+}
+
+.employee-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.employee-sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.employee-sidebar-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(139, 92, 246, 0.45);
+}
+
+.employee-sidebar-title h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+}
+
+.employee-sidebar-sub {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.employee-sidebar-close {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.employee-sidebar-section h4 {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  margin: 0 0 12px;
+}
+
+.employee-kv {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+
+.employee-Goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.employee-goal-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.goal-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.goal-title {
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.goal-percent {
+  color: #e0c3fc;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.goal-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.goal-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.18);
+  color: #e0c3fc;
+}
+
+.goal-due {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.9), rgba(52, 211, 153, 0.9));
+}

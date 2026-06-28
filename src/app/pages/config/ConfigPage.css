@@ -1,0 +1,173 @@
+.config-page {
+  width: 100%;
+  padding: 12px 20px 40px;
+}
+
+.config-section {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.config-section h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.config-card {
+  background: rgba(8, 15, 38, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.config-card-header {
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 10px;
+}
+
+.subtle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.toggle input {
+  accent-color: rgba(139, 92, 246, 1);
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.checkbox-item input {
+  accent-color: rgba(139, 92, 246, 1);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.12);
+  color: #ddd6fe;
+  font-weight: 800;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.builtins {
+  margin-bottom: 14px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.input {
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  padding: 0 12px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.perm-block {
+  margin-top: 6px;
+}
+
+.perm-title {
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.primary {
+  height: 44px;
+  border-radius: 14px;
+  border: none;
+  background: rgba(139, 92, 246, 0.95);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary:hover {
+  background: rgba(139, 92, 246, 1);
+}
+
+.custom-role-list {
+  margin-top: 16px;
+}
+
+.custom-role-item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+
+.custom-role-name {
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.custom-role-perms {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+}
+
+
+

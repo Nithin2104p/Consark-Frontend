@@ -1,0 +1,55 @@
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./AuthContext";
+import { canAccess } from "./permissions";
+import type { ProtectedRouteProps } from "../types";
+
+export function ProtectedRoute({ routeId, children }: ProtectedRouteProps) {
+  const { role } = useAuth();
+
+  if (!canAccess(role, routeId)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+export function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, authLoading } = useAuth();
+  const location = useLocation();
+
+  if (authLoading) {
+    return (
+      <div className="page center">
+        <p className="muted">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+  }
+
+  // Extra safety: role/permissions gate already applies, but unauthenticated users
+  // must never see protected routes.
+
+
+  return <>{children}</>;
+}
+
+export function GuestOnly({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="auth-page center">
+        <p className="muted">Loading...</p>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}

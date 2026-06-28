@@ -1,0 +1,118 @@
+/* ===== GLOBE WRAP ===== */
+.globe-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.globe-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* ===== TOOLTIP — floats over the globe via fixed positioning from JS ===== */
+.employee-tooltip {
+  position: absolute;
+
+  top: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(10, 14, 28, 0.52);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  z-index: 9999;
+  animation: tooltipFade 0.15s ease forwards;
+  max-width: 200px;
+  min-width: 160px;
+}
+
+/* ===== AVATAR — small and tight ===== */
+.tooltip-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(139, 92, 246, 0.55);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+}
+
+/* ===== TEXT BODY ===== */
+.tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.tooltip-name {
+  font-size: 12px;
+  font-weight: 650;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.tooltip-role {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tooltip-country {
+  font-size: 10px;
+  color: rgba(139, 92, 246, 0.8);
+}
+
+.tooltip-projects {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tooltip-meta {
+  font-size: 10px;
+  color: rgba(139, 92, 246, 0.8);
+  margin-top: 1px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* subtle dot separator */
+.tooltip-meta::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.6);
+  flex-shrink: 0;
+}
+
+/* ===== FADE IN ===== */
+@keyframes tooltipFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
