@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
 import { useTranslation } from "../../hooks/useTranslation";
 import { SEARCH_DEBOUNCE_MS, SCROLL_LOAD_THRESHOLD_PX } from "../../constants/ui";
+import { ASSIGNEE_SELF } from "../../constants/task";
 
 type UserOption = { id: string; name: string };
 
@@ -83,7 +84,7 @@ export function AssigneeSelect({
 
   const selectedUser = users.find((u) => u.id === value);
   const displayLabel =
-    value === "self"
+    value === ASSIGNEE_SELF
       ? t("tasks.assignee.self")
       : selectedUser
         ? selectedUser.name
@@ -114,9 +115,9 @@ export function AssigneeSelect({
           <div className="assignee-list" onScroll={handleScroll}>
             <button
               type="button"
-              className={`assignee-option ${value === "self" ? "assignee-option--active" : ""}`}
+              className={`assignee-option ${value === ASSIGNEE_SELF ? "assignee-option--active" : ""}`}
               onClick={() => {
-                onChange("self");
+                onChange(ASSIGNEE_SELF);
                 setOpen(false);
               }}
             >

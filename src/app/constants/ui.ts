@@ -17,3 +17,15 @@ export const CHART_COLORS = {
 } as const;
 
 export const AVATAR_PLACEHOLDER_BASE = "https://i.pravatar.cc/150?u=";
+
+export const PRIORITY_BADGE_CLASS: Record<import("../types/task").TaskPriority, string> = {
+  Low: "gray",
+  Medium: "warn",
+  High: "bad",
+};
+
+export const STATUS_BADGE_CLASS: Record<import("../types/task").TaskStatus, string> = {
+  Open: "info",
+  "In-Progress": "warn",
+  Completed: "ok",
+};

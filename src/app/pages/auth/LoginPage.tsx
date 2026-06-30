@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getApiErrorMessage } from "../../utils/apiError";
 import { useAuth } from "../../auth/AuthContext";
 import { getUserCompaniesByEmail, type CompanyDto } from "../../services/auth.service";
-import { validateLoginForm, validateSignupForm, type LoginFormData } from "../tasks/validation";
+import { validateLoginForm, validateSignupForm, type LoginFormData } from "../../validation/auth";
 import { useTranslation } from "../../hooks/useTranslation";
 import { EMAIL_REGEX, PASSWORD_PLACEHOLDER } from "../../constants/auth";
 import { DEFAULT_POST_AUTH_PATH } from "../../constants/routes";
@@ -83,10 +83,7 @@ export function LoginPage({ defaultMode = "login" }: LoginPageProps) {
         setLoginStep("company");
       }
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("auth.errors.loadCompaniesFailed")
-        : t("auth.errors.loadCompaniesFailed");
-      setErrors({ form: message });
+      setErrors({ form: getApiErrorMessage(err, t("auth.errors.loadCompaniesFailed")) });
     } finally {
       setLoadingCompanies(false);
     }
@@ -100,7 +97,7 @@ export function LoginPage({ defaultMode = "login" }: LoginPageProps) {
   const handleLoginSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const payload = validateLoginForm({ email, password });
+    const payload = validateLoginForm(t, { email, password });
     if (!payload.valid || !payload.data) {
       setErrors(payload.errors ?? { form: t("auth.login.fixFields") });
       return;
@@ -122,10 +119,7 @@ export function LoginPage({ defaultMode = "login" }: LoginPageProps) {
       toast.success(t("auth.login.welcomeBack"));
       navigate(from, { replace: true });
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("auth.login.authFailed")
-        : t("auth.login.authFailed");
-      toast.error(message);
+      toast.error(getApiErrorMessage(err, t("auth.login.authFailed")));
     } finally {
       setSubmitting(false);
     }
@@ -134,7 +128,7 @@ export function LoginPage({ defaultMode = "login" }: LoginPageProps) {
   const handleSignupSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const payload = validateSignupForm({
+    const payload = validateSignupForm(t, {
       firstName,
       lastName: lastName || undefined,
       email,
@@ -161,10 +155,7 @@ export function LoginPage({ defaultMode = "login" }: LoginPageProps) {
       toast.success(t("auth.signup.success"));
       navigate(from, { replace: true });
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("auth.login.authFailed")
-        : t("auth.login.authFailed");
-      toast.error(message);
+      toast.error(getApiErrorMessage(err, t("auth.login.authFailed")));
     } finally {
       setSubmitting(false);
     }

@@ -161,6 +161,7 @@
     "title": "Employees",
     "description": "Manage team members and employee records.",
     "createUser": "Create User",
+    "addUserModalTitle": "Add User",
     "searchPlaceholder": "Search employees...",
     "active": "Active",
     "inactive": "Inactive",
@@ -168,7 +169,9 @@
     "loadError": "Failed to load employees.",
     "createSuccess": "User created successfully.",
     "createError": "Failed to create user.",
+    "creating": "Creating...",
     "noEmployees": "No employees found",
+    "colAvatar": "Avatar",
     "colName": "Name",
     "colEmail": "Email",
     "colStatus": "Status",
@@ -182,8 +185,20 @@
     "formCompany": "Company name",
     "formLocation": "Location",
     "formActive": "Active user",
+    "formFirstNamePlaceholder": "Enter first name",
+    "formLastNamePlaceholder": "Enter last name",
+    "formEmailPlaceholder": "Enter email",
+    "selectCountry": "Select country",
     "submitCreate": "Create User",
     "panelTitle": "Employee Tasks",
+    "sidebarUserDetails": "User details",
+    "sidebarEmail": "Email",
+    "sidebarName": "Name",
+    "sidebarStatus": "Status",
+    "sidebarCreated": "Created",
+    "sidebarTasksTitle": "Tasks ({{count}})",
+    "sidebarLoadingTasks": "Loading tasks...",
+    "sidebarNoTasks": "No tasks found for this user.",
     "noTasks": "No tasks assigned",
     "closePanel": "Close panel"
   },
@@ -191,7 +206,14 @@
     "title": "Configuration",
     "notifications": {
       "title": "Notifications",
-      "description": "Choose how you want to receive notifications."
+      "description": "Choose how you want to receive notifications.",
+      "channels": {
+        "EMAIL": "Email",
+        "SMS": "SMS",
+        "Whatsapp": "WhatsApp",
+        "Slack": "Slack",
+        "Teams": "Teams"
+      }
     },
     "roles": {
       "title": "Custom roles",
@@ -200,7 +222,13 @@
       "namePlaceholder": "e.g. Compliance reviewer",
       "permissionsTitle": "Enable permissions",
       "createButton": "Create custom role",
-      "createdTitle": "Created roles"
+      "createdTitle": "Created roles",
+      "permissions": {
+        "Goals:create": "Create goals",
+        "Goals:view": "View goals",
+        "approvals:view": "View approvals",
+        "approvals:edit": "Edit approvals"
+      }
     }
   },
   "roles": {
@@ -211,7 +239,6 @@
     "user": "User"
   },
   "auth": {
-    "roleLabel": "Role",
     "unauthorizedTitle": "Access denied",
     "unauthorizedMessage": "Your role does not have permission to view this page.",
     "backToTasks": "Check your Tasks",
@@ -266,14 +293,29 @@
       "noToken": "Authentication response did not include a token."
     }
   },
-  "pages": {
-    "employees": {
-      "title": "Employees",
-      "description": "Manage team members and employee records."
+  "validation": {
+    "failed": "Validation failed",
+    "task": {
+      "titleMin": "Title must be at least 3 characters",
+      "titleMax": "Title must not exceed 120 characters",
+      "descriptionMax": "Description must not exceed 1000 characters",
+      "priorityRequired": "Please select a priority",
+      "statusRequired": "Please select a status"
     },
-    "settings": {
-      "title": "Settings",
-      "description": "Configure application and account preferences."
+    "auth": {
+      "invalidEmail": "Enter a valid email address",
+      "passwordMin": "Password must be at least 6 characters",
+      "confirmPasswordMin": "Confirm password must be at least 6 characters",
+      "firstNameRequired": "First name is required",
+      "firstNameMax": "First name must not exceed 80 characters",
+      "lastNameMax": "Last name must not exceed 80 characters",
+      "companyRequired": "Company name is required",
+      "companyMax": "Company name must not exceed 120 characters",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "employee": {
+      "firstNameRequired": "First name is required.",
+      "emailRequired": "Email is required."
     }
   }
 }

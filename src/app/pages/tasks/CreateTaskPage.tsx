@@ -1,25 +1,18 @@
-import { useEffect, useState, useCallback, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { createTask } from "../../services/task.service";
-import { getUsers, type UserDto } from "../../services/user.service";
 import { defaultTaskForm, TaskForm, type TaskFormState } from "./TaskForm";
-import { validateTaskForm } from "./validation";
+import { validateTaskForm } from "../../validation/task";
 import { useTranslation } from "../../hooks/useTranslation";
-import { ASSIGNEE_PAGE_SIZE } from "../../constants/pagination";
+import { useAssigneeOptions } from "../../hooks/useAssigneeOptions";
+import { ASSIGNEE_SELF } from "../../constants/task";
 import { ROUTES } from "../../constants/routes";
 import type { TaskInput } from "../../types/task";
 import { useAuth } from "../../auth/AuthContext";
 import { hasPermission, PERMISSIONS } from "../../auth/permissions";
+import { getApiErrorMessage } from "../../utils/apiError";
 import "./TasksPage.css";
-
-function mapAssignees(users: UserDto[]) {
-  return users.map((u) => ({
-    id: u._id,
-    name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
-  }));
-}
 
 export function CreateTaskPage() {
   const { t } = useTranslation();
@@ -28,57 +21,16 @@ export function CreateTaskPage() {
   const [form, setForm] = useState<TaskFormState>(defaultTaskForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [assignees, setAssignees] = useState<UserDto[]>([]);
-  const [assigneePage, setAssigneePage] = useState(1);
-  const [assigneeTotalPages, setAssigneeTotalPages] = useState(1);
-  const [assigneeLoading, setAssigneeLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const canAssign = hasPermission(role, PERMISSIONS.TASKS_ASSIGN);
-
-  const loadAssignees = useCallback(async (page: number, search: string) => {
-    setAssigneeLoading(true);
-    try {
-      const res = await getUsers({ page, limit: ASSIGNEE_PAGE_SIZE, search: search || undefined });
-      setAssignees(res.users);
-      setAssigneePage(res.pagination.page);
-      setAssigneeTotalPages(res.pagination.totalPages);
-    } catch {
-      setAssignees([]);
-      setAssigneeTotalPages(1);
-    } finally {
-      setAssigneeLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!canAssign) return;
-    void loadAssignees(1, "");
-  }, [canAssign, loadAssignees]);
-
-  const handleAssigneeLoadMore = useCallback(async () => {
-    if (assigneeLoading) return;
-    const nextPage = assigneePage + 1;
-    setAssigneeLoading(true);
-    try {
-      const res = await getUsers({ page: nextPage, limit: ASSIGNEE_PAGE_SIZE, search: searchQuery || undefined });
-      setAssignees((prev) => [...prev, ...res.users]);
-      setAssigneePage(res.pagination.page);
-      setAssigneeTotalPages(res.pagination.totalPages);
-    } catch {
-      // keep existing
-    } finally {
-      setAssigneeLoading(false);
-    }
-  }, [assigneeLoading, assigneePage, searchQuery]);
-
-  const handleAssigneeSearchChange = useCallback(
-    (query: string) => {
-      setSearchQuery(query);
-      void loadAssignees(1, query);
-    },
-    [loadAssignees]
-  );
+  const {
+    assigneeOptions,
+    assigneeLoading,
+    assigneeHasMore,
+    searchQuery,
+    handleAssigneeLoadMore,
+    handleAssigneeSearchChange,
+  } = useAssigneeOptions(canAssign);
 
   const handleChange = (key: keyof TaskFormState, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -87,7 +39,7 @@ export function CreateTaskPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = validateTaskForm(form);
+    const result = validateTaskForm(t, form);
     if (!result.valid || !result.data) {
       setErrors(result.errors ?? { form: t("tasks.create.fixFields") });
       return;
@@ -99,15 +51,12 @@ export function CreateTaskPage() {
     try {
       await createTask({
         ...result.data,
-        assignedTo: result.data.assignedTo === "self" && user ? user.id : result.data.assignedTo || undefined,
+        assignedTo: result.data.assignedTo === ASSIGNEE_SELF && user ? user.id : result.data.assignedTo || undefined,
       } as TaskInput);
       toast.success(t("tasks.create.success"));
       navigate(ROUTES.TASKS);
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("tasks.create.error")
-        : t("tasks.create.error");
-      toast.error(message);
+      toast.error(getApiErrorMessage(err, t("tasks.create.error")));
     } finally {
       setSubmitting(false);
     }
@@ -132,9 +81,9 @@ export function CreateTaskPage() {
           onSubmit={handleSubmit}
           onCancel={() => navigate(ROUTES.TASKS)}
           showAssignee={canAssign}
-          assignees={mapAssignees(assignees)}
+          assignees={assigneeOptions}
           assigneeLoading={assigneeLoading}
-          assigneeHasMore={assigneePage < assigneeTotalPages}
+          assigneeHasMore={assigneeHasMore}
           onAssigneeLoadMore={handleAssigneeLoadMore}
           assigneeSearchQuery={searchQuery}
           onAssigneeSearchChange={handleAssigneeSearchChange}

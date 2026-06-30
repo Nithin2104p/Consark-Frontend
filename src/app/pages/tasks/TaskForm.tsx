@@ -9,6 +9,7 @@ import {
   type TaskInput,
 } from "../../types/task";
 import { useTranslation } from "../../hooks/useTranslation";
+import { ASSIGNEE_SELF } from "../../constants/task";
 import { AssigneeSelect } from "./AssigneeSelect";
 
 export type TaskFormState = TaskInput;
@@ -148,5 +149,5 @@ export const defaultTaskForm: TaskFormState = {
   description: "",
   priority: DEFAULT_TASK_PRIORITY,
   status: DEFAULT_TASK_STATUS,
-  assignedTo: "self",
+  assignedTo: ASSIGNEE_SELF,
 };

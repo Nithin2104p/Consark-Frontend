@@ -6,6 +6,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_OPTIONS } from "../auth/permissions";
 import { PROFILE_CLOSE_DELAY_MS } from "../constants/ui";
+import { ROUTES } from "../constants/routes";
 import type { Role } from "../types";
 
 function getInitial(name: string, fallback: string) {
@@ -45,7 +46,7 @@ export function Header() {
     setProfileOpen(false);
     logout();
     toast.info(t("header.signedOut"));
-    navigate("/");
+    navigate(ROUTES.LOGIN);
   };
 
   return (

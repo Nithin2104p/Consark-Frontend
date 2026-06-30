@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams, Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
 import { setPassword as authSetPassword } from "../../services/auth.service";
 import { useTranslation } from "../../hooks/useTranslation";
+import { getApiErrorMessage } from "../../utils/apiError";
 import { MIN_PASSWORD_LENGTH, PASSWORD_PLACEHOLDER } from "../../constants/auth";
 import { ROUTES } from "../../constants/routes";
 import "./LoginPage.css";
@@ -45,10 +45,7 @@ export function SetPasswordPage() {
       toast.success(t("auth.setPassword.successToast"));
       setSubmitted(true);
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("auth.errors.setPasswordFailed")
-        : t("auth.errors.setPasswordFailed");
-      toast.error(message);
+      toast.error(getApiErrorMessage(err, t("auth.errors.setPasswordFailed")));
     } finally {
       setSubmitting(false);
     }

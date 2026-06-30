@@ -62,7 +62,7 @@ export function AppRouter() {
             }
           />
           <Route
-            path="/tasks/:id/edit"
+            path={ROUTES.TASKS_EDIT}
             element={
               <RequireAuth>
                 <EditTaskPage />

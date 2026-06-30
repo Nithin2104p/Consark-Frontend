@@ -1,5 +1,6 @@
 import { apiClient, TOKEN_KEY } from "./client";
 import { USER_KEY } from "../constants/storage";
+import { AUTH_ERROR_CODES } from "../constants/auth";
 import type { AuthUser, LoginCredentials, SignupCredentials } from "../types/auth";
 
 type AuthResponse = {
@@ -19,7 +20,7 @@ type AuthResponse = {
 function extractToken(data: AuthResponse): string {
   const token = data.token ?? data.accessToken ?? data.data?.token ?? data.data?.accessToken;
   if (!token) {
-    throw new Error("AUTH_NO_TOKEN");
+    throw new Error(AUTH_ERROR_CODES.NO_TOKEN);
   }
   return token;
 }
@@ -91,7 +92,7 @@ export async function setPassword(payload: SetPasswordPayload): Promise<void> {
   });
 
   if (!data.success) {
-    throw new Error(data.message ?? "AUTH_SET_PASSWORD_FAILED");
+    throw new Error(data.message ?? AUTH_ERROR_CODES.SET_PASSWORD_FAILED);
   }
 }
 
@@ -114,7 +115,7 @@ export async function getUserCompaniesByEmail(email: string): Promise<CompanyDto
   });
 
   if (!data.success || !Array.isArray(data.data)) {
-    throw new Error(data.message ?? "AUTH_LOAD_COMPANIES_FAILED");
+    throw new Error(data.message ?? AUTH_ERROR_CODES.LOAD_COMPANIES_FAILED);
   }
 
   return data.data;

@@ -22,3 +22,5 @@ export const VISIBLE_PERMISSIONS = [
   "approvals:view",
   "approvals:edit",
 ] as const;
+
+export type ConfigPermission = (typeof VISIBLE_PERMISSIONS)[number];

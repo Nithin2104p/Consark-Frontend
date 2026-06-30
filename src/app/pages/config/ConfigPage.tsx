@@ -5,7 +5,7 @@ import {
   NOTIFICATION_CHANNELS,
   VISIBLE_PERMISSIONS,
   type NotificationChannel,
-} from "./constants";
+} from "../../constants/config";
 import "./ConfigPage.css";
 
 export function ConfigPage() {
@@ -50,7 +50,7 @@ export function ConfigPage() {
             {NOTIFICATION_CHANNELS.map((ch) => (
               <label key={ch} className="checkbox-item">
                 <input type="checkbox" checked={enabledChannels[ch]} onChange={() => toggleChannel(ch)} />
-                <span>{ch}</span>
+                <span>{t(`config.notifications.channels.${ch}`)}</span>
               </label>
             ))}
           </div>
@@ -82,7 +82,7 @@ export function ConfigPage() {
                       checked={Boolean(customPermissionSet[p])}
                       onChange={() => togglePermission(p)}
                     />
-                    <span>{p}</span>
+                    <span>{t(`config.roles.permissions.${p}`)}</span>
                   </label>
                 ))}
               </div>
@@ -102,7 +102,7 @@ export function ConfigPage() {
                   <div className="custom-role-perms">
                     {Object.entries(r.permissions)
                       .filter(([, v]) => v)
-                      .map(([k]) => k)
+                      .map(([k]) => t(`config.roles.permissions.${k}`))
                       .join(", ")}
                   </div>
                 </div>

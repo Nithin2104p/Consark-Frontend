@@ -3,7 +3,7 @@ import { LayoutDashboard, Users, Settings, Target, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react";
 import { canAccess } from "../auth/permissions";
 import { useAuth } from "../auth/AuthContext";
-import { navItems, taskNavItems } from "../constants";
+import { navItems, taskNavItems } from "../constants/nav";
 import { MOBILE_BREAKPOINT } from "../constants/ui";
 import { useTranslation } from "../hooks/useTranslation";
 

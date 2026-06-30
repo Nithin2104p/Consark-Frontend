@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { deleteTask, getTasks } from "../../services/task.service";
 import { EmptyState } from "../../components/EmptyState";
@@ -11,7 +10,10 @@ import { PriorityBadge } from "../../components/PriorityBadge";
 import { StatusBadge } from "../../components/StatusBadge";
 import { useTranslation } from "../../hooks/useTranslation";
 import { DEFAULT_TASK_SORT, TASK_PAGE_SIZE } from "../../constants/pagination";
-import { ROUTES } from "../../constants/routes";
+import { TASK_SORT_OPTIONS } from "../../constants/task";
+import { ROUTES, taskEditPath } from "../../constants/routes";
+import { getApiErrorMessage } from "../../utils/apiError";
+import { formatDate } from "../../utils/format";
 import {
   TASK_PRIORITIES,
   TASK_PRIORITY_I18N_KEY,
@@ -22,13 +24,6 @@ import {
   type TaskStatus,
 } from "../../types/task";
 import "./TasksPage.css";
-
-function formatDate(value: string, fallback: string) {
-  if (!value) return fallback;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-}
 
 export function TaskListPage() {
   const { t } = useTranslation();
@@ -60,10 +55,7 @@ export function TaskListPage() {
       setTasks(response.Tasks);
       setTotal(response.total);
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("tasks.list.loadError")
-        : t("tasks.list.loadError");
-      setError(message);
+      setError(getApiErrorMessage(err, t("tasks.list.loadError")));
     } finally {
       setLoading(false);
     }
@@ -92,10 +84,7 @@ export function TaskListPage() {
         await loadTasks();
       }
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("tasks.list.deleteError")
-        : t("tasks.list.deleteError");
-      toast.error(message);
+      toast.error(getApiErrorMessage(err, t("tasks.list.deleteError")));
     } finally {
       setDeletingId(null);
     }
@@ -153,10 +142,11 @@ export function TaskListPage() {
           </select>
 
           <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t("tasks.list.sortAria")}>
-            <option value="-createdAt">{t("tasks.list.sortNewest")}</option>
-            <option value="createdAt">{t("tasks.list.sortOldest")}</option>
-            <option value="title">{t("tasks.list.sortTitleAsc")}</option>
-            <option value="-title">{t("tasks.list.sortTitleDesc")}</option>
+            {TASK_SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {t(option.labelKey)}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -200,7 +190,7 @@ export function TaskListPage() {
                   <button
                     type="button"
                     className="action-btn edit-btn"
-                    onClick={() => navigate(`/tasks/${task.id}/edit`)}
+                    onClick={() => navigate(taskEditPath(task.id))}
                   >
                     {t("tasks.list.edit")}
                   </button>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import { Users } from "lucide-react";
-import { getUsers } from "../services/user.service";
+import { getUsers, getUserCount } from "../services/user.service";
 import { COUNTRY_COORDINATES, COUNTRY_COLORS, ARC_COLORS } from "../data/countryCoordinates";
 import { useTranslation } from "../hooks/useTranslation";
 import { Card } from "./Card";
@@ -13,7 +13,6 @@ import {
   GLOBE_POINT_SIZE,
   GLOBE_USER_FETCH_LIMIT,
 } from "../constants/ui";
-import { getUserCount } from "../services/user.service";
 import "./GlobeCard.css";
 
 export function GlobeCard() {

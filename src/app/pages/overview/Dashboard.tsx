@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
 import { GlobeCard } from "../../components/GlobeCard";
 import { ProductivityChart } from "../../components/ProductivityChart";
 import { PageHeader } from "../../components/PageHeader";
@@ -8,6 +7,7 @@ import { EMPLOYEE_ROLES } from "../../auth/permissions";
 import { useAuth } from "../../auth/AuthContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import { EMPTY_TASK_COUNTS, getTaskCounts, type TaskCountsDto } from "../../services/task.service";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 export function Dashboard() {
   const { t } = useTranslation();
@@ -25,10 +25,7 @@ export function Dashboard() {
       const data = await getTaskCounts(userId);
       setCounts(data);
     } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? t("dashboard.loadError")
-        : t("dashboard.loadError");
-      setError(message);
+      setError(getApiErrorMessage(err, t("dashboard.loadError")));
     } finally {
       setLoading(false);
     }
