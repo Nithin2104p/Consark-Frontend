@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  BarChart3,
   Settings,
   Target,
   Menu,
@@ -20,12 +19,10 @@ import { useTranslation } from "../hooks/useTranslation";
 const icons = {
   overview: LayoutDashboard,
   taskDashboard: LayoutDashboard,
-  Goals: ListTodo,
+  taskList: ListTodo,
   employees: Users,
   projects: FileText,
-  analytics: BarChart3,
-
-  Goals: Target,
+  tasks: Target,
   settings: Settings,
   checkSquare: CheckSquare,
 };
@@ -60,7 +57,7 @@ export function Sidebar() {
         <button
           className="sidebar-toggle"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
+          aria-label={t("sidebar.toggleMenu")}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -70,7 +67,7 @@ export function Sidebar() {
         <button
           type="button"
           className="sidebar-backdrop"
-          aria-label="Close menu"
+          aria-label={t("sidebar.closeMenu")}
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -99,7 +96,7 @@ export function Sidebar() {
                 }}
               >
                 <Icon size={18} aria-hidden="true" />
-                {item.id === "taskDashboard" ? "Dashboard" : "Goals"}
+                {t(`nav.${item.id}`)}
               </NavLink>
             );
           })}
@@ -110,7 +107,7 @@ export function Sidebar() {
               <NavLink
                 key={item.id}
                 to={item.path}
-                end={item.path === "/"}
+                end={true}
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={() => isMobile && setIsOpen(false)}
                 onKeyDown={(e) => {

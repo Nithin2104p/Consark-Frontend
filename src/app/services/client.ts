@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:3000/api";
+export const API_BASE_URL = "https://consark-backend-2.onrender.com/api";
 export const TOKEN_KEY = "consark_token";
 
 export const apiClient = axios.create({

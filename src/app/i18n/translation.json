@@ -4,222 +4,74 @@
     "initial": "W"
   },
   "nav": {
-    "overview": "Overview",
+    "taskDashboard": "Dashboard",
+    "tasks": "Tasks",
     "employees": "Employees",
-    "projects": "Projects",
-    "analytics": "Analytics",
-    "approvals": "Approvals",
-    "Goals": "Goals",
     "config": "Config",
     "settings": "Settings"
   },
-  "user": {
-    "name": "John Doe",
-    "role": "Admin"
+  "sidebar": {
+    "toggleMenu": "Toggle menu",
+    "closeMenu": "Close menu"
   },
   "header": {
-    "searchPlaceholder": "Search anything...",
-    "newRequest": "New Request",
-    "notifications": "Notifications"
+    "signedOut": "Signed out.",
+    "companyFallback": "CONSARK",
+    "openProfileMenu": "Open profile menu",
+    "userFallback": "User",
+    "logout": "Logout"
+  },
+  "common": {
+    "loading": "Loading...",
+    "tryAgain": "Try again"
   },
   "page": {
     "title": "Overview",
     "dashboard": "Dashboard"
   },
   "actions": {
-    "viewAll": "View All",
     "viewDetails": "View Details"
   },
-  "approvals": {
-    "newRequest": "New request",
-    "table": {
-      "approval": "Approval",
-      "requester": "Requester",
-      "type": "Type",
-      "approver": "Approver",
-      "status": "Status",
-      "action": "Action"
-    },
-    "sidebar": {
-      "title": "New request",
-      "close": "Close",
-      "requestTitle": "Request title",
-      "enterShortTitle": "Enter a short title",
-      "requestType": "Request type",
-      "typePlaceholder": "Pull Request, Leave, Access...",
-      "description": "Description",
-      "descriptionPlaceholder": "Describe the request",
-      "approver": "Approver",
-      "cancel": "Cancel",
-      "createRequest": "Create request"
-    },
-    "toasts": {
-      "fixFormErrors": "Please fix the form errors",
-      "requestCreatedSuccessfully": "Request created successfully"
-    }
-  },
-  "metrics": {
-    "pending": {
-      "label": "Pending approvals",
-      "note": "12% increase"
-    },
-    "conversion": {
-      "label": "Goals Completed today",
-      "note": "+5.2% productivity"
-    },
-    "total": {
-      "label": "Projects On Track",
-      "note": "3 projects recovered"
-    },
-    "score": {
-      "label": "Overloaded Employees",
-      "note": "High workload detected",
-      "change": "At Risk"
-    }
+  "dashboard": {
+    "loading": "Loading dashboard...",
+    "loadError": "Failed to load KPI cards."
   },
   "cards": {
-    "incidents": "Resolved Incidents",
-    "projectHealth": "Project Health",
-    "taskProgress": "Task Progress",
     "globe": "Global Trend Map",
     "productivity": "Productivity Data",
-    "totalGoals": "Total Goals",
-    "openGoals": "Open Goals",
-    "inProgressGoals": "In Progress Goals",
-    "completedGoals": "Completed Goals"
+    "totalTasks": "Total Tasks",
+    "openTasks": "Open Tasks",
+    "inProgressTasks": "In Progress Tasks",
+    "completedTasks": "Completed Tasks"
   },
   "globe": {
-    "employeesWorldwide": "Employees Worldwide",
-    "growth": "Global Teams Growth",
-    "activity": "Activity",
-    "activityHigh": "High",
-    "usersCount": "4.2k",
-    "growthValue": "+24%"
+    "employeesWorldwide": "Employees Worldwide"
   },
   "productivity": {
-    "totalRequests": "Total Goals",
-    "totalValue": "2846",
-    "timePeriod": "Time Period",
-    "GoalsCompleted": "Goals Completed"
+    "totalRequests": "Total Tasks"
   },
   "pie": {
     "completed": "Completed",
-    "delayed": "Delayed",
     "open": "Open",
     "inProgress": "In Progress"
   },
-  "months": {
-    "jan": "Jan",
-    "feb": "Feb",
-    "mar": "Mar",
-    "apr": "Apr",
-    "may": "May",
-    "jun": "Jun",
-    "jul": "Jul"
-  },
-  "incidents": {
-    "req1245": {
-      "user": "John Smith",
-      "time": "2 min ago"
-    },
-    "req1246": {
-      "user": "Sarah Johnson",
-      "time": "5 min ago"
-    },
-    "req1247": {
-      "user": "Mike Wilson",
-      "time": "12 min ago"
-    },
-    "req1248": {
-      "user": "Emily Brown",
-      "time": "18 min ago"
-    }
-  },
-  "projects": {
-    "alpha": {
-      "name": "Project Alpha"
-    },
-    "beta": {
-      "name": "Project Beta"
-    },
-    "gamma": {
-      "name": "Project Gamma"
-    },
-    "delta": {
-      "name": "Project Delta"
-    }
-  },
-  "projectSidebar": {
-    "GoalsAndProgress": "Goals & progress",
-    "progress": "{{progress}}% progress",
-    "due": "Due: {{date}}",
-    "noDue": "—",
-    "close": "Close"
-  },
-  "Goals": {
-    "uiReview": {
-      "name": "UI Design Review",
-      "team": "Design Team"
-    },
-    "backend": {
-      "name": "Backend Integration",
-      "team": "Dev Team"
-    },
-    "qa": {
-      "name": "QA Testing",
-      "team": "QA Team"
-    },
-    "docs": {
-      "name": "Documentation",
-      "team": "Tech Writers"
-    }
-  },
-  "status": {
-    "onTrack": "on-track",
-    "atRisk": "at-risk",
-    "delayed": "delayed",
-    "completed": "completed",
-    "inProgress": "in-progress",
-    "pending": "pending",
-    "approved": "approved",
-    "rejected": "rejected"
-  },
-  "priority": {
-    "high": "high",
-    "medium": "medium",
-    "low": "low"
-  },
   "roles": {
+    "super_admin": "Super Admin",
     "superAdmin": "Super Admin",
     "admin": "Admin",
-    "employee": "Employee"
+    "employee": "Employee",
+    "user": "User"
   },
   "auth": {
     "roleLabel": "Role",
     "unauthorizedTitle": "Access denied",
     "unauthorizedMessage": "Your role does not have permission to view this page.",
-    "backToGoals": "Check your Goals"
+    "backToTasks": "Check your Tasks"
   },
   "pages": {
     "employees": {
       "title": "Employees",
       "description": "Manage team members and employee records."
-    },
-    "projects": {
-      "title": "Projects",
-      "description": "Track project status, deadlines, and health."
-    },
-    "analytics": {
-      "title": "Analytics",
-      "description": "View productivity trends and performance metrics."
-    },
-    "approvals": {
-      "title": "Approvals",
-      "description": "Review pending requests and approve workflows."
-    },
-    "Goals": {
-      "title": "Goals",
-      "description": "Create and manage team and organizational Goals."
     },
     "settings": {
       "title": "Settings",

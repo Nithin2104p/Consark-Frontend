@@ -1,12 +1,12 @@
 export type TaskPriority = "Low" | "Medium" | "High";
-export type Goalstatus = "Open" | "In Progress" | "Completed";
+export type TaskStatus = "Open" | "In-Progress" | "Completed";
 
 export type Task = {
   id: string;
   title: string;
   description: string;
   priority: TaskPriority;
-  status: Goalstatus;
+  status: TaskStatus;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
@@ -17,23 +17,25 @@ export type TaskInput = {
   title: string;
   description: string;
   priority: TaskPriority;
-  status: Goalstatus;
+  status: TaskStatus;
+  assignedTo?: string;
 };
 
 export type TaskFilters = {
-  status?: Goalstatus;
+  page?: number;
+  limit?: number;
+  sort?: string;
+  search?: string;
+  status?: TaskStatus;
   priority?: TaskPriority;
   createdBy?: string;
   assignedTo?: string;
-  limit?: number;
-  skip?: number;
-  sort?: string;
 };
 
-export type GoalsResponse = {
-  Goals: Task[];
+export type TasksResponse = {
+  Tasks: Task[];
   total: number;
 };
 
 export const TASK_PRIORITIES: TaskPriority[] = ["Low", "Medium", "High"];
-export const TASK_STATUSES: Goalstatus[] = ["Open", "In Progress", "Completed"];
+export const TASK_STATUSES: TaskStatus[] = ["Open", "In-Progress", "Completed"];

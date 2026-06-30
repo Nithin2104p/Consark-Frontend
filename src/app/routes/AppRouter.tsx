@@ -3,10 +3,11 @@ import { GuestOnly, ProtectedRoute, RequireAuth } from "../auth/ProtectedRoute";
 import { AppLayout } from "../layout/AppLayout";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignupPage } from "../pages/auth/SignupPage";
+import { SetPasswordPage } from "../pages/auth/SetPasswordPage";
 import { OverviewPage } from "../pages/OverviewPage";
 
-import { SimplePage } from "../pages/SimplePage";
 import { ConfigPage } from "../pages/config/ConfigPage";
+import { SimplePage } from "../pages/SimplePage";
 import { CreateTaskPage } from "../pages/tasks/CreateTaskPage";
 import { EditTaskPage } from "../pages/tasks/EditTaskPage";
 import { TaskListPage } from "../pages/tasks/TaskListPage";
@@ -25,36 +26,36 @@ export function AppRouter() {
           }
         />
 
-        <Route
-          path="signup"
-          element={
-            <GuestOnly>
-              <SignupPage />
-            </GuestOnly>
-          }
-        />
+         <Route
+           path="signup"
+           element={
+             <GuestOnly>
+               <SignupPage />
+             </GuestOnly>
+           }
+         />
+         <Route
+           path="set-password"
+           element={
+             <GuestOnly>
+               <SetPasswordPage />
+             </GuestOnly>
+           }
+         />
 
-        <Route element={<AppLayout />}>
-          <Route
-            index
-            path="overview"
-            element={
-              <ProtectedRoute routeId="overview">
-                <OverviewPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="dashboard"
-            element={
-              <ProtectedRoute routeId="overview">
-                <OverviewPage />
-              </ProtectedRoute>
-            }
-          />
+         <Route element={<AppLayout />}>
+           <Route
+             index
+             path="overview"
+             element={<OverviewPage />}
+           />
+           <Route
+             path="dashboard"
+             element={<OverviewPage />}
+           />
 
           <Route
-            path="Goals"
+            path="tasks"
             element={
               <RequireAuth>
                 <TaskListPage />
@@ -62,7 +63,7 @@ export function AppRouter() {
             }
           />
           <Route
-            path="Goals/new"
+            path="tasks/new"
             element={
               <RequireAuth>
                 <CreateTaskPage />
@@ -70,7 +71,7 @@ export function AppRouter() {
             }
           />
           <Route
-            path="Goals/:id/edit"
+            path="tasks/:id/edit"
             element={
               <RequireAuth>
                 <EditTaskPage />
@@ -82,23 +83,6 @@ export function AppRouter() {
             element={
               <ProtectedRoute routeId="employees">
                 <SimplePage titleKey="pages.employees.title" descriptionKey="pages.employees.description" />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="projects"
-            element={
-              <ProtectedRoute routeId="projects">
-                <SimplePage titleKey="pages.projects.title" descriptionKey="pages.projects.description" />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="Goals"
-            element={
-              <ProtectedRoute routeId="Goals">
-                <SimplePage titleKey="pages.Goals.title" descriptionKey="pages.Goals.description" />
               </ProtectedRoute>
             }
           />

@@ -5,6 +5,7 @@ import { LoadingState } from "../LoadingState";
 import { ErrorState } from "../ErrorState";
 import axios from "axios";
 import { getTaskCounts, type TaskCountsDto } from "../../services/task.service";
+import { useAuth } from "../../auth/AuthContext";
 
 type Kpi = {
     id: string;
@@ -16,13 +17,14 @@ type Kpi = {
 
 export function KpiCards() {
     const { t } = useTranslation();
+    const { user, role } = useAuth();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [counts, setCounts] = useState<TaskCountsDto>({
-        totalGoals: 0,
-        openGoals: 0,
-        inProgressGoals: 0,
-        completedGoals: 0,
+        totalTasks: 0,
+        openTasks: 0,
+        inProgressTasks: 0,
+        completedTasks: 0,
     });
 
     useEffect(() => {
@@ -30,53 +32,55 @@ export function KpiCards() {
             setLoading(true);
             setError(null);
             try {
-                const data = await getTaskCounts();
+                const isEmployee = role === "employee" || role === "user";
+                const userId = isEmployee && user?.id ? user.id : undefined;
+                const data = await getTaskCounts(userId);
                 setCounts(data);
             } catch (err) {
                 const message = axios.isAxiosError(err)
-                    ? (err.response?.data as { message?: string })?.message ?? "Failed to load KPI cards."
-                    : "Failed to load KPI cards.";
+                    ? (err.response?.data as { message?: string })?.message ?? t("dashboard.loadError")
+                    : t("dashboard.loadError");
                 setError(message);
             } finally {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [role, user]);
 
     const kpis: Kpi[] = useMemo(() => {
         return [
             {
-                id: "totalGoals",
-                label: t("cards.totalGoals"),
-                value: String(counts.totalGoals),
+                id: "totalTasks",
+                label: t("cards.totalTasks"),
+                value: String(counts.totalTasks),
                 color: "purple",
                 icon: ListTodo,
             },
             {
-                id: "openGoals",
-                label: t("cards.openGoals"),
-                value: String(counts.openGoals),
+                id: "openTasks",
+                label: t("cards.openTasks"),
+                value: String(counts.openTasks),
                 color: "blue",
                 icon: Circle,
             },
             {
-                id: "inProgressGoals",
-                label: t("cards.inProgressGoals"),
-                value: String(counts.inProgressGoals),
+                id: "inProgressTasks",
+                label: t("cards.inProgressTasks"),
+                value: String(counts.inProgressTasks),
                 color: "cyan",
                 icon: Loader2,
             },
             {
-                id: "completedGoals",
-                label: t("cards.completedGoals"),
-                value: String(counts.completedGoals),
+                id: "completedTasks",
+                label: t("cards.completedTasks"),
+                value: String(counts.completedTasks),
                 color: "pink",
                 icon: CheckCircle,
             },
         ];
     }, [t, counts]);
 
-    if (loading) return <LoadingState message="Loading dashboard..." />;
+    if (loading) return <LoadingState message={t("dashboard.loading")} />;
     if (error) return <ErrorState message={error} />;
 
     return (
@@ -84,7 +88,7 @@ export function KpiCards() {
             {kpis.map((k) => {
                 const Icon = k.icon;
                 return (
-                    <div key={k.id} className="card">
+                    <div key={k.id} className="card kpi-card">
                         <div className="metric-top">
                             <div className={`icon-box ${k.color}`}>
                                 <Icon size={20} />

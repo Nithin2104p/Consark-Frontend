@@ -8,7 +8,8 @@ export const taskFormSchema = z.object({
     .optional()
     .default(""),
   priority: z.enum(["Low", "Medium", "High"], { message: "Please select a priority" }),
-  status: z.enum(["Open", "In Progress", "Completed"], { message: "Please select a status" }),
+  status: z.enum(["Open", "In-Progress", "Completed"], { message: "Please select a status" }),
+  assignedTo: z.string().optional().default("self"),
 });
 
 export type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -69,6 +70,7 @@ export const signupFormSchema = z
     email: z.string().email("Enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+    companyName: z.string().min(1, "Company name is required").max(120, "Company name must not exceed 120 characters"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

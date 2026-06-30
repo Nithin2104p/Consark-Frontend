@@ -30,6 +30,7 @@
 .auth-brand strong {
   display: block;
   font-size: 20px;
+  color: #ffffff;
 }
 
 .auth-tabs {
@@ -86,6 +87,13 @@
   color: var(--text-muted);
 }
 
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .form-field input,
 .form-field textarea,
 .form-field select {
@@ -123,27 +131,103 @@
 
 .password-with-toggle input {
   width: 100%;
-  padding-right: 44px;
+  padding-right: 68px;
 }
 
 .password-toggle {
   position: absolute;
-  right: 10px;
+  right: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 34px;
-  width: 34px;
-  padding: 0;
+  height: 28px;
+  min-width: 44px;
+  padding: 0 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-muted);
 }
 
 .password-toggle:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
+}
+
+.auth-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.auth-desc {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+}
+
+.auth-success {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.auth-step {
+  margin-bottom: 12px;
+}
+
+.company-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.company-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.company-option:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.company-display {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.auth-terms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.auth-terms input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.auth-terms span {
+  cursor: pointer;
+  user-select: none;
 }

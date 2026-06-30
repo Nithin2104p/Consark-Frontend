@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
-import { TrendingUp, Users } from "lucide-react";
-import { employees } from "../data/employees";
-import { COUNTRY_COORDINATES, ARC_COLORS } from "../data/countryCoordinates";
+import { Users } from "lucide-react";
+import { getUsers } from "../services/user.service";
+import { COUNTRY_COORDINATES, COUNTRY_COLORS, ARC_COLORS } from "../data/countryCoordinates";
 import { useTranslation } from "../hooks/useTranslation";
 import { Card } from "./Card";
 import { GLOBE_IMAGE } from "./constants";
+import { getUserCount } from "../services/user.service";
 import "./GlobeCard.css";
 
 export function GlobeCard() {
@@ -38,29 +39,61 @@ export function GlobeCard() {
     }
   };
 
-  const [hoveredEmployee, setHoveredEmployee] = useState<any | null>(null);
+  const [hoveredUser, setHoveredUser] = useState<any | null>(null);
+  const [userCount, setUserCount] = useState<number | null>(null);
+  const [users, setUsers] = useState<{ _id: string; firstName?: string; lastName?: string; email: string; location?: string }[]>([]);
 
-  const pointsData = employees.map((emp) => {
-    const coords = COUNTRY_COORDINATES[emp.country];
-    if (!coords) return null;
+  useEffect(() => {
+    void (async () => {
+      try {
+        const count = await getUserCount();
+        setUserCount(count);
+      } catch {
+        // keep default on error
+      }
+    })();
+  }, []);
 
-    // small deterministic offset to avoid exact overlap when multiple employees
-    const offsetFactor = ((emp.id % 10) - 5) * 0.02;
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await getUsers({ limit: 1000 });
+        setUsers(res.users);
+      } catch {
+        // keep empty on error
+      }
+    })();
+  }, []);
 
-    return {
-      ...emp,
-      lat: coords.lat + offsetFactor,
-      lng: coords.lng + offsetFactor,
-      size: 0.4 + Math.min(0.6, emp.projects * 0.05),
-      color: "#8b5cf6",
-    };
-  }).filter(Boolean) as any[];
+  const pointsData = users
+    .map((u) => {
+      const country = u.location;
+      const coords = country ? COUNTRY_COORDINATES[country] : null;
+      if (!coords) return null;
 
-  const arcsData = employees
+      const offsetFactor = (parseInt(u._id.slice(-2), 16) % 10 - 5) * 0.02;
+      const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email;
+
+      return {
+        _id: u._id,
+        name,
+        email: u.email,
+        country,
+        lat: coords.lat + offsetFactor,
+        lng: coords.lng + offsetFactor,
+        size: 0.4,
+        color: (COUNTRY_COLORS as Record<string, string>)[country!] || "#8b5cf6",
+      };
+    })
+    .filter(Boolean) as any[];
+
+  const arcsData = users
     .map((src, i) => {
-      const dst = employees[(i + 1) % employees.length];
-      const srcCoords = COUNTRY_COORDINATES[src.country];
-      const dstCoords = COUNTRY_COORDINATES[dst.country];
+      const dst = users[(i + 1) % users.length];
+      const srcCountry = src.location;
+      const dstCountry = dst.location;
+      const srcCoords = srcCountry ? COUNTRY_COORDINATES[srcCountry] : null;
+      const dstCoords = dstCountry ? COUNTRY_COORDINATES[dstCountry] : null;
       if (!srcCoords || !dstCoords) return null;
 
       return {
@@ -73,15 +106,15 @@ export function GlobeCard() {
     })
     .filter(Boolean) as any[];
 
-  // stop auto-rotate when hovering an employee
+  // stop auto-rotate when hovering a user
   useEffect(() => {
     if (!globeRef.current) return;
     const controls = globeRef.current.controls();
-    controls.autoRotate = !hoveredEmployee;
-  }, [hoveredEmployee]);
+    controls.autoRotate = !hoveredUser;
+  }, [hoveredUser]);
 
   return (
-    <Card title={t("cards.globe")} actionLabel={t("actions.viewDetails")}>
+    <Card title={t("cards.globe")}>
       <div className="globe-wrap">
         <div ref={containerRef} className="globe-canvas">
           {size.width > 0 && size.height > 0 && (
@@ -101,8 +134,8 @@ export function GlobeCard() {
               pointColor="color"
               pointAltitude={0.01}
               pointRadius="size"
-              onPointHover={(p) => setHoveredEmployee(p || null)}
-              onPointClick={(p) => console.log("Clicked employee", p)}
+              onPointHover={(p) => setHoveredUser(p || null)}
+              onPointClick={(p) => console.log("Clicked user", p)}
               atmosphereColor="#8b5cf6"
               atmosphereAltitude={0.2}
               onGlobeReady={handleGlobeReady}
@@ -110,13 +143,11 @@ export function GlobeCard() {
           )}
         </div>
 
-        {hoveredEmployee && (
+        {hoveredUser && (
           <div className="employee-tooltip glass">
-            <img className="tooltip-avatar" src={hoveredEmployee.avatar} alt={hoveredEmployee.name} />
             <div className="tooltip-body">
-              <div className="tooltip-name">{hoveredEmployee.name}</div>
-              <div className="tooltip-role">{hoveredEmployee.designation}</div>
-              <div className="tooltip-country">{hoveredEmployee.country}</div>
+              <div className="tooltip-name">{hoveredUser.name}</div>
+              <div className="tooltip-country">{hoveredUser.country}</div>
             </div>
           </div>
         )}
@@ -125,13 +156,7 @@ export function GlobeCard() {
           <div className="globe-stat">
             <div className="small">{t("globe.employeesWorldwide")}</div>
             <div className="stat-value purple">
-              <Users size={16} /> {t("globe.usersCount")}
-            </div>
-          </div>
-          <div className="globe-stat">
-            <div className="small">{t("globe.growth")}</div>
-            <div className="stat-value green">
-              <TrendingUp size={16} /> {t("globe.growthValue")}
+              <Users size={16} /> {userCount != null ? userCount.toLocaleString() : "—"}
             </div>
           </div>
         </div>

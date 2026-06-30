@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { canAccess } from "./permissions";
+import { useTranslation } from "../hooks/useTranslation";
 import type { ProtectedRouteProps } from "../types";
 
 export function ProtectedRoute({ routeId, children }: ProtectedRouteProps) {
@@ -16,11 +17,12 @@ export function ProtectedRoute({ routeId, children }: ProtectedRouteProps) {
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, authLoading } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
 
   if (authLoading) {
     return (
       <div className="page center">
-        <p className="muted">Loading...</p>
+        <p className="muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -38,11 +40,12 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
 export function GuestOnly({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, authLoading } = useAuth();
+  const { t } = useTranslation();
 
   if (authLoading) {
     return (
       <div className="auth-page center">
-        <p className="muted">Loading...</p>
+        <p className="muted">{t("common.loading")}</p>
       </div>
     );
   }

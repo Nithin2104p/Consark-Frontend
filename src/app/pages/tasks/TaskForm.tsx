@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskInput } from "../../types/task";
+import { AssigneeSelect } from "./AssigneeSelect";
 
 export type TaskFormState = TaskInput;
 
@@ -11,6 +12,13 @@ type TaskFormProps = {
   onChange: (key: keyof TaskFormState, value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onCancel?: () => void;
+  showAssignee?: boolean;
+  assignees?: { id: string; name: string }[];
+  assigneeLoading?: boolean;
+  assigneeHasMore?: boolean;
+  onAssigneeLoadMore?: () => void;
+  assigneeSearchQuery?: string;
+  onAssigneeSearchChange?: (query: string) => void;
 };
 
 export function TaskForm({
@@ -21,6 +29,13 @@ export function TaskForm({
   onChange,
   onSubmit,
   onCancel,
+  showAssignee,
+  assignees = [],
+  assigneeLoading = false,
+  assigneeHasMore = false,
+  onAssigneeLoadMore,
+  assigneeSearchQuery = "",
+  onAssigneeSearchChange,
 }: TaskFormProps) {
   return (
     <form className="task-form" onSubmit={onSubmit} noValidate>
@@ -86,6 +101,23 @@ export function TaskForm({
         </div>
       </div>
 
+      {showAssignee && (
+        <div className="form-field">
+          <label htmlFor="assignedTo">Assignee</label>
+          <AssigneeSelect
+            value={form.assignedTo ?? ""}
+            onChange={(v) => onChange("assignedTo", v)}
+            users={assignees}
+            loading={assigneeLoading}
+            hasMore={assigneeHasMore}
+            onLoadMore={onAssigneeLoadMore ?? (() => {})}
+            searchQuery={assigneeSearchQuery}
+            onSearchChange={onAssigneeSearchChange ?? (() => {})}
+          />
+          {errors.assignedTo && <span className="field-error">{errors.assignedTo}</span>}
+        </div>
+      )}
+
       <div className="form-actions">
         {onCancel && (
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={submitting}>
@@ -105,4 +137,5 @@ export const defaultTaskForm: TaskFormState = {
   description: "",
   priority: "Medium",
   status: "Open",
+  assignedTo: "self",
 };

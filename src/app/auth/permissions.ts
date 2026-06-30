@@ -2,8 +2,10 @@ import type { Role } from "../types";
 
 export const ROLES = {
   SUPER_ADMIN: "superAdmin",
+  SUPER_ADMIN_API: "super_admin",
   ADMIN: "admin",
   EMPLOYEE: "employee",
+  USER: "user",
 } as const;
 
 export const PERMISSIONS = {
@@ -16,8 +18,10 @@ export const PERMISSIONS = {
 
   APPROVALS_VIEW: "approvals:view",
   APPROVALS_EDIT: "approvals:edit",
-  Goals_VIEW: "Goals:view",
-  Goals_CREATE: "Goals:create",
+
+  TASKS_VIEW: "tasks:view",
+  TASKS_CREATE: "tasks:create",
+  TASKS_ASSIGN: "tasks:assign",
 
   SETTINGS_VIEW: "settings:view",
   SETTINGS_EDIT: "settings:edit",
@@ -26,6 +30,8 @@ export const PERMISSIONS = {
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  [ROLES.SUPER_ADMIN_API]: [...Object.values(PERMISSIONS)],
+
   [ROLES.SUPER_ADMIN]: [
     ...Object.values(PERMISSIONS),
   ],
@@ -40,21 +46,26 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 
     PERMISSIONS.APPROVALS_VIEW,
     PERMISSIONS.APPROVALS_EDIT,
-    PERMISSIONS.Goals_VIEW,
-    PERMISSIONS.Goals_CREATE,
+    PERMISSIONS.TASKS_VIEW,
+    PERMISSIONS.TASKS_CREATE,
+    PERMISSIONS.TASKS_ASSIGN,
   ],
 
   [ROLES.EMPLOYEE]: [
+    PERMISSIONS.OVERVIEW_VIEW,
     PERMISSIONS.APPROVALS_VIEW,
-    PERMISSIONS.Goals_VIEW,
+    PERMISSIONS.TASKS_VIEW,
+    PERMISSIONS.TASKS_CREATE,
   ],
+
+  [ROLES.USER]: [PERMISSIONS.OVERVIEW_VIEW],
 };
 
 export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   overview: PERMISSIONS.OVERVIEW_VIEW,
   employees: PERMISSIONS.EMPLOYEES_VIEW,
   approvals: PERMISSIONS.APPROVALS_VIEW,
-  Goals: PERMISSIONS.Goals_VIEW,
+  tasks: PERMISSIONS.TASKS_VIEW,
   settings: PERMISSIONS.SETTINGS_VIEW,
   config: PERMISSIONS.SETTINGS_VIEW,
 };

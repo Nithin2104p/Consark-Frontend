@@ -1,13 +1,13 @@
-import type { Goalstatus } from "../types/task";
+import type { TaskStatus } from "../types/task";
 
-const statusClass: Record<Goalstatus, string> = {
+const statusClass: Record<TaskStatus, string> = {
   Open: "info",
-  "In Progress": "warn",
+  "In-Progress": "warn",
   Completed: "ok",
 };
 
 type StatusBadgeProps = {
-  status: Goalstatus;
+  status: TaskStatus;
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

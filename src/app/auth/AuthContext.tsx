@@ -1,17 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { setUnauthorizedHandler } from "../api/client";
-import * as authService from "../api/authService";
+import { setUnauthorizedHandler } from "../services/client";
+import * as authService from "../services/auth.service";
 import type { AuthUser, LoginCredentials, SignupCredentials } from "../types/auth";
 import type { AuthContextValue, Role } from "../types";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>("superAdmin");
-
-  // Role will be derived from backend-provided user/token when available.
-  // Current repo stores only AuthUser (id/email/name) so we keep fallback "superAdmin".
-
+  const [role, setRole] = useState<Role>(() => {
+    const stored = authService.getStoredUser();
+    return stored?.role ?? "superAdmin";
+  });
   const [user, setUser] = useState<AuthUser | null>(() => authService.getStoredUser());
   const [token, setToken] = useState<string | null>(() => authService.getStoredToken());
   const [authLoading, setAuthLoading] = useState(true);
@@ -22,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authService.logout();
     setToken(null);
     setUser(null);
+    setRole("superAdmin");
   }, []);
 
   useEffect(() => {
@@ -40,6 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextUser = await authService.login(credentials);
     setToken(authService.getStoredToken());
     setUser(nextUser);
+    if (nextUser.role) {
+      setRole(nextUser.role);
+    }
     return nextUser;
   }, []);
 
@@ -47,6 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextUser = await authService.signup(credentials);
     setToken(authService.getStoredToken());
     setUser(nextUser);
+    if (nextUser.role) {
+      setRole(nextUser.role);
+    }
     return nextUser;
   }, []);
 

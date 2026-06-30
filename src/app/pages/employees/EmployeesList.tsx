@@ -1,83 +1,177 @@
-import { useMemo, useState, useEffect } from "react";
-import { getEmployeesLikeFromUsers, type EmployeeLike } from "../../services/user.service";
-import { employeeGoalMapping } from "../../data/employeeGoals";
-import { GoalsWithGoals as Goals } from "../../data/Goals";
-import { goalCompletionPercent } from "../Goals/goalUtils";
+import { useMemo, useState, useEffect, type FormEvent } from "react";
+import axios from "axios";
+import { getUsers, createUser, getUserById, type UserDto, type CreateUserPayload } from "../../services/user.service";
 import { useTranslation } from "../../hooks/useTranslation";
+import { toast } from "react-toastify";
+import { COUNTRY_OPTIONS } from "../../data/countryCoordinates";
 import "./EmployeesList.css";
-
 
 
 
 export function EmployeesList() {
   const { t } = useTranslation();
 
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserTasks, setSelectedUserTasks] = useState<import("../../types/task").Task[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [employees, setEmployees] = useState<EmployeeLike[]>([]);
-
-  // Pagination
-  const pageSize = 7;
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(employees.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const visibleEmployees = employees.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const limit = 7;
+
+  const refreshUsers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const next = await getUsers({ page, limit });
+      setUsers(next.users);
+      setTotalPages(next.pagination.totalPages);
+    } catch {
+      setError("Failed to load users.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    void (async () => {
+    (async () => {
       setLoading(true);
       setError(null);
       try {
-        const next = await getEmployeesLikeFromUsers();
-        setEmployees(next);
-      } catch (err) {
-        setError("Failed to load employees.");
+        const next = await getUsers({ page, limit });
+        setUsers(next.users);
+        setTotalPages(next.pagination.totalPages);
+      } catch {
+        setError("Failed to load users.");
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [page]);
 
-  const selectedEmployee = useMemo(() => {
-    if (!selectedEmployeeId) return null;
-    return employees.find((e) => e.id === selectedEmployeeId) ?? null;
-  }, [employees, selectedEmployeeId]);
+  useEffect(() => {
+    if (!selectedUserId) {
+      setSelectedUserTasks([]);
+      return;
+    }
+    setTasksLoading(true);
+    void (async () => {
+      try {
+        const userWithTasks = await getUserById(selectedUserId);
+        setSelectedUserTasks(userWithTasks.tasks ?? []);
+      } catch {
+        setSelectedUserTasks([]);
+      } finally {
+        setTasksLoading(false);
+      }
+    })();
+  }, [selectedUserId]);
 
-  const selectedGoals = useMemo(() => {
-    if (!selectedEmployee) return [];
-    // employeeGoals mapping uses numeric ids from dummy employees.
-    // Until backend/contract supports this, use a stable derived numeric id.
-    const numericId = Number(String(selectedEmployeeIdToNumber(selectedEmployee.id)));
-    const goalIds = employeeGoalMapping[numericId] ?? [];
-    const byId = new Map(Goals.map((g) => [g.id, g] as const));
-    return goalIds.map((id) => byId.get(id)).filter((g): g is (typeof Goals)[number] => Boolean(g));
-  }, [selectedEmployee]);
+  const visibleUsers = users;
+  const safePage = Math.min(page, totalPages);
 
-  function selectedEmployeeIdToNumber(id: string): number {
-    return Array.from(id).reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 10;
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [userForm, setUserForm] = useState<CreateUserPayload>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    companyName: "",
+    isActive: true,
+    roleId: "employee",
+    location: "",
+  });
+  const [userErrors, setUserErrors] = useState<Record<string, string>>({});
+  const [submittingUser, setSubmittingUser] = useState(false);
+
+  const handleUserChange = (key: keyof CreateUserPayload, value: string | boolean) => {
+    setUserForm((current) => ({ ...current, [key]: value }));
+    if (userErrors[key]) {
+      setUserErrors((current) => ({ ...current, [key]: "" }));
+    }
+  };
+
+  const handleCreateUser = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextErrors: Record<string, string> = {};
+    if (!userForm.firstName.trim()) nextErrors.firstName = "First name is required.";
+    if (!userForm.email.trim()) nextErrors.email = "Email is required.";
+    if (Object.keys(nextErrors).length > 0) {
+      setUserErrors(nextErrors);
+      return;
+    }
+
+    setUserErrors({});
+    setSubmittingUser(true);
+    try {
+      await createUser(userForm);
+      toast.success("User created successfully.");
+      setShowAddUserModal(false);
+      setUserForm({ firstName: "", lastName: "", email: "", password: "", companyName: "", isActive: true, roleId: "employee", location: "" });
+      await refreshUsers();
+    } catch (err) {
+      const message = axios.isAxiosError(err)
+        ? (err.response?.data as { message?: string })?.message ?? "Failed to create user."
+        : "Failed to create user.";
+      toast.error(message);
+    } finally {
+      setSubmittingUser(false);
+    }
+  };
+
+  const selectedUser = useMemo(() => {
+    if (!selectedUserId) return null;
+    return users.find((e) => e._id === selectedUserId) ?? null;
+  }, [users, selectedUserId]);
+
+  function formatName(user: UserDto) {
+    const first = (user.firstName ?? "").trim();
+    const last = (user.lastName ?? "").trim();
+    return `${first} ${last}`.trim() || user.email;
+  }
+
+  function formatDate(value: string | undefined) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   // Disable body scroll when sidebar is open
   useEffect(() => {
-    if (selectedEmployeeId !== null) {
+    const hasOverlay = selectedUserId !== null || showAddUserModal;
+    if (hasOverlay) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-
     return () => {
       document.body.style.overflow = "";
     };
-  }, [selectedEmployeeId]);
+  }, [selectedUserId, showAddUserModal]);
 
   return (
     <div className="employees-list">
-      <h2>{t("pages.employees.title")}</h2>
-      <p className="muted page-desc">{t("pages.employees.description")}</p>
+      <div className="employees-list-header">
+        <div>
+          <h2>{t("pages.employees.title")}</h2>
+          <p className="muted page-desc">{t("pages.employees.description")}</p>
+        </div>
+        <button className="btn btn-add-user" type="button" onClick={() => setShowAddUserModal(true)}>
+          Add User
+        </button>
+      </div>
 
-      {loading && <p className="muted">Loading employees...</p>}
+      {loading && <p className="muted">Loading users...</p>}
       {!loading && error && <p className="muted">{error}</p>}
 
 
@@ -88,41 +182,39 @@ export function EmployeesList() {
               <div className="col-avatar">Avatar</div>
               <div className="col-name">Name</div>
               <div className="col-email">Email</div>
-              <div className="col-manager">Manager</div>
-              <div className="col-department">Department</div>
+              <div className="col-status">Status</div>
             </div>
 
-            {visibleEmployees.map((emp) => (
+            {visibleUsers.map((user) => (
               <button
                 type="button"
-                key={emp.id}
+                key={user._id}
                 className={
-                  selectedEmployeeId === emp.id
+                  selectedUserId === user._id
                     ? "table-row-employee is-selected"
                     : "table-row-employee"
                 }
-                onClick={() => setSelectedEmployeeId(emp.id)}
+                onClick={() => setSelectedUserId(user._id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setSelectedEmployeeId(emp.id);
+                    setSelectedUserId(user._id);
                   }
                 }}
               >
-
-
                 <div className="col-avatar">
                   <img
                     className="employee-avatar"
-                    src={emp.avatar ?? "https://i.pravatar.cc/150?u=" + encodeURIComponent(emp.id)}
-                    alt={emp.name}
+                    src={"https://i.pravatar.cc/150?u=" + encodeURIComponent(user._id)}
+                    alt={formatName(user)}
                   />
                 </div>
-                <div className="col-name">{emp.name}</div>
-                <div className="col-email">{emp.email}</div>
-                <div className="col-manager">{emp.manager}</div>
-                <div className="col-department">
-                  <span className="department-tag">{emp.department}</span>
+                <div className="col-name">{formatName(user)}</div>
+                <div className="col-email">{user.email}</div>
+                <div className="col-status">
+                  <span className={`status-tag ${user.isActive ? "active" : "inactive"}`}>
+                    {user.isActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
               </button>
             ))}
@@ -159,29 +251,37 @@ export function EmployeesList() {
             </button>
           </div>
 
-          {selectedEmployee && (
+          {selectedUser && (
             <>
-              <div className="employees-backdrop" onClick={() => setSelectedEmployeeId(null)} />
+              <div
+                className="employees-backdrop"
+                onClick={() => setSelectedUserId(null)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedUserId(null);
+                  }
+                }}
+              />
               <aside className="employee-sidebar">
                 <div className="employee-sidebar-header">
                   <div className="employee-sidebar-title">
                     <img
                       className="employee-sidebar-avatar"
-                      src={
-                        selectedEmployee.avatar ??
-                        "https://i.pravatar.cc/150?u=" + encodeURIComponent(selectedEmployee.id)
-                      }
-                      alt={selectedEmployee.name}
+                      src={"https://i.pravatar.cc/150?u=" + encodeURIComponent(selectedUser._id)}
+                      alt={formatName(selectedUser)}
                     />
                     <div>
-                      <h3>{selectedEmployee.name}</h3>
-                      <div className="employee-sidebar-sub">{selectedEmployee.designation}</div>
+                      <h3>{formatName(selectedUser)}</h3>
+                      <div className="employee-sidebar-sub">{selectedUser.isActive ? "Active" : "Inactive"}</div>
                     </div>
                   </div>
                   <button
                     className="employee-sidebar-close"
                     type="button"
-                    onClick={() => setSelectedEmployeeId(null)}
+                    onClick={() => setSelectedUserId(null)}
                     aria-label="Close"
                   >
                     ×
@@ -189,65 +289,148 @@ export function EmployeesList() {
                 </div>
 
                 <div className="employee-sidebar-section">
-                  <h4>Employee details</h4>
+                  <h4>User details</h4>
                   <div className="employee-kv">
                     <div className="kv">
                       <div className="k">Email</div>
-                      <div className="v">{selectedEmployee.email}</div>
+                      <div className="v">{selectedUser.email}</div>
                     </div>
                     <div className="kv">
-                      <div className="k">Manager</div>
-                      <div className="v">{selectedEmployee.manager}</div>
+                      <div className="k">Name</div>
+                      <div className="v">{formatName(selectedUser)}</div>
                     </div>
                     <div className="kv">
-                      <div className="k">Department</div>
-                      <div className="v">{selectedEmployee.department}</div>
+                      <div className="k">Status</div>
+                      <div className="v">{selectedUser.isActive ? "Active" : "Inactive"}</div>
                     </div>
                     <div className="kv">
-                      <div className="k">Country</div>
-                      <div className="v">{selectedEmployee.country}</div>
+                      <div className="k">Created</div>
+                      <div className="v">{formatDate(selectedUser.createdAt)}</div>
                     </div>
-                    <div className="kv">
-                      <div className="k">Designation</div>
-                      <div className="v">{selectedEmployee.designation}</div>
-                    </div>
-                    <div className="kv">
-                      <div className="k">Projects</div>
-                      <div className="v">{selectedEmployee.projects}</div>
-                    </div>
-
                   </div>
                 </div>
 
                 <div className="employee-sidebar-section">
-                  <h4>Goals & progress</h4>
-                  <div className="employee-Goals-list">
-                    {selectedGoals.map((g) => {
-                      const progress = goalCompletionPercent(g);
-                      return (
-                        <div key={g.id} className="employee-goal-card">
-                          <div className="goal-top">
-                            <div className="goal-title">{g.title}</div>
-                            <div className="goal-percent">{progress}%</div>
+                  <h4>Tasks ({selectedUserTasks.length})</h4>
+                  {tasksLoading && <p className="muted">Loading tasks...</p>}
+                  {!tasksLoading && selectedUserTasks.length === 0 && (
+                    <p className="muted">No tasks found for this user.</p>
+                  )}
+                  {!tasksLoading && selectedUserTasks.length > 0 && (
+                    <div className="employee-tasks-list">
+                      {selectedUserTasks.map((task) => (
+                        <div key={task.id} className="employee-task-card">
+                          <div className="employee-task-title">{task.title}</div>
+                          <div className="employee-task-meta">
+                            <span className={`status-tag ${task.status === "In-Progress" ? "inprogress" : task.status.toLowerCase()}`}>
+                              {task.status}
+                            </span>
+                            <span className={`priority-tag ${task.priority.toLowerCase()}`}>{task.priority}</span>
                           </div>
-                          <div className="goal-meta">
-                            <span className="goal-pill">{g.status}</span>
-                            <span className="goal-due">Due: {g.dueDate ?? "—"}</span>
-                          </div>
-                          <div className="progress-bar">
-                            <div className="progress-fill" style={{ width: `${progress}%` }} />
-                          </div>
+                          <div className="employee-task-desc">{task.description || "No description"}</div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </aside>
             </>
           )}
         </>
       )}
+
+      {showAddUserModal && (
+        <>
+          <div
+            className="employees-backdrop"
+            onClick={() => setShowAddUserModal(false)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setShowAddUserModal(false);
+              }
+            }}
+          />
+          <div className="add-user-modal">
+            <div className="add-user-modal-header">
+              <h3>Add User</h3>
+              <button
+                className="employee-sidebar-close"
+                type="button"
+                onClick={() => setShowAddUserModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <form className="task-form" onSubmit={handleCreateUser} noValidate>
+              <div className="form-field">
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  value={userForm.firstName}
+                  onChange={(e) => handleUserChange("firstName", e.target.value)}
+                  placeholder="Enter first name"
+                  aria-invalid={Boolean(userErrors.firstName)}
+                />
+                {userErrors.firstName && <span className="field-error">{userErrors.firstName}</span>}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  value={userForm.lastName ?? ""}
+                  onChange={(e) => handleUserChange("lastName", e.target.value)}
+                  placeholder="Enter last name"
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => handleUserChange("email", e.target.value)}
+                  placeholder="Enter email"
+                  aria-invalid={Boolean(userErrors.email)}
+                />
+                {userErrors.email && <span className="field-error">{userErrors.email}</span>}
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="location">Location</label>
+                <select
+                  id="location"
+                  value={userForm.location ?? ""}
+                  onChange={(e) => handleUserChange("location", e.target.value)}
+                >
+                  <option value="">Select country</option>
+                  {COUNTRY_OPTIONS.map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddUserModal(false)} disabled={submittingUser}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn" disabled={submittingUser}>
+                  {submittingUser ? "Creating..." : "Create User"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-

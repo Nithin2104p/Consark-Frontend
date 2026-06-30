@@ -10,81 +10,112 @@ export type UserDto = {
     createdAt?: string;
     updatedAt?: string;
     deletedAt?: string | null;
-    // backend also returns password but we intentionally omit it from the UI dto
+    location?: string;
 };
 
 export type UsersResponse = {
     statusCode: number;
     success: boolean;
     message: string;
-    data: UserDto[];
+    data: {
+        users: UserDto[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    };
 };
 
-function normalizeName(user: UserDto): string {
-    const first = (user.firstName ?? "").trim();
-    const last = (user.lastName ?? "").trim();
-    const combined = `${first} ${last}`.trim();
-    return combined || user.email;
-}
+export type UserCountDto = { count: number };
 
-export type EmployeeLike = {
-    id: string;
-    name: string;
+export type CreateUserPayload = {
+    firstName: string;
+    lastName?: string | null;
     email: string;
-    manager: string;
-    department: string;
-    country: string;
-    designation: string;
-    projects: number;
-    avatar?: string;
+    password: string;
+    companyName: string;
+    isActive: boolean;
+    roleId?: string;
+    location?: string;
 };
 
-function toEmployeeLike(user: UserDto): EmployeeLike {
-    // Backend payload in this task does not include fields like department/manager.
-    // Until backend contracts are extended, keep these derived placeholders.
-    // This preserves current UI structure while still removing dummy employees.
-    const name = normalizeName(user);
-
-    // Deterministic derived values from _id to keep UI stable.
-    const seed = Array.from(user._id).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const projects = (seed % 5) + 1;
-    const deptIdx = seed % 4;
-    const dept = ["Engineering", "Product", "Design", "Operations"][deptIdx];
-
-    const managerIdx = seed % 3;
-    const manager = ["Maria Silva", "Ava Brown", "John Doe"][managerIdx];
-
-    const countryIdx = seed % 5;
-    const country = ["India", "USA", "Germany", "UK", "Brazil"][countryIdx];
-
-    const designationIdx = seed % 4;
-    const designation = [
-        "Frontend Developer",
-        "Backend Engineer",
-        "Product Manager",
-        "QA Engineer",
-    ][designationIdx];
-
+export async function createUser(payload: CreateUserPayload): Promise<UserDto> {
+    const { data } = await apiClient.post("/users", payload);
+    const raw = (data as Record<string, unknown>).user ?? data;
     return {
-        id: user._id,
-        name,
-        email: user.email,
-        manager,
-        department: dept,
-        country,
-        designation,
-        projects,
+        _id: String(raw._id ?? raw.id ?? ""),
+        email: String(raw.email ?? payload.email),
+        firstName: raw.firstName != null ? String(raw.firstName) : payload.firstName,
+        lastName: raw.lastName != null ? String(raw.lastName) : payload.lastName ?? undefined,
+        roleId: raw.roleId != null ? String(raw.roleId) : undefined,
+        isActive: raw.isActive != null ? Boolean(raw.isActive) : payload.isActive,
+        createdAt: raw.createdAt != null ? String(raw.createdAt) : undefined,
+        updatedAt: raw.updatedAt != null ? String(raw.updatedAt) : undefined,
+        deletedAt: raw.deletedAt != null ? String(raw.deletedAt) : null,
+        location: raw.location != null ? String(raw.location) : payload.location ?? undefined,
     };
 }
 
-export async function getUsers(): Promise<UserDto[]> {
-    const { data } = await apiClient.get<UsersResponse>("/users");
-    // If backend returns {data:[...]}
-    return data?.data ?? [];
+export type UserFilters = {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    search?: string;
+    isActive?: boolean;
+};
+
+export type UsersListResponse = {
+    users: UserDto[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+};
+
+export async function getUsers(filters: UserFilters = {}): Promise<UsersListResponse> {
+    const params: Record<string, string | number> = {};
+    if (filters.page != null) params.page = filters.page;
+    if (filters.limit != null) params.limit = filters.limit;
+    if (filters.sort) params.sort = filters.sort;
+    if (filters.search) params.search = filters.search;
+    if (filters.isActive != null) params.isActive = filters.isActive ? "true" : "false";
+
+    const { data } = await apiClient.get("/users", { params });
+    const payload = data as Record<string, unknown>;
+    const nested = (payload.data ?? {}) as Record<string, unknown>;
+    const list = (nested.users ?? nested.data ?? []) as UserDto[];
+    const pagination = (nested.pagination ?? {}) as Record<string, unknown>;
+
+    return {
+        users: list,
+        pagination: {
+            page: typeof pagination.page === "number" ? pagination.page : filters.page ?? 1,
+            limit: typeof pagination.limit === "number" ? pagination.limit : filters.limit ?? list.length,
+            total: typeof pagination.total === "number" ? pagination.total : list.length,
+            totalPages: typeof pagination.totalPages === "number" ? pagination.totalPages : 1,
+        },
+    };
 }
 
-export async function getEmployeesLikeFromUsers(): Promise<EmployeeLike[]> {
-    const users = await getUsers();
-    return users.map(toEmployeeLike);
+export type UserWithTasksDto = UserDto & {
+    tasks?: import("../types/task").Task[];
+};
+
+export async function getUserById(id: string): Promise<UserWithTasksDto> {
+    const { data } = await apiClient.get<{ data: { user: UserDto; tasks: import("../types/task").Task[] } }>(`/users/${id}`);
+    const user = data.data.user;
+    return {
+        ...user,
+        tasks: data.data.tasks ?? [],
+    };
+}
+
+export async function getUserCount(): Promise<number> {
+    const { data } = await apiClient.get<{ data: UserCountDto }>("/users/count");
+    return Number(data?.data?.count ?? 0);
 }
 

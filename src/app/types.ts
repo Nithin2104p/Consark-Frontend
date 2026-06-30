@@ -1,6 +1,6 @@
 import type { AuthUser, LoginCredentials, SignupCredentials } from "./types/auth";
 
-export type Role = "admin" | "employee" | "superAdmin";
+export type Role = "admin" | "employee" | "super_admin" | "superAdmin" | "user";
 
 export type AuthContextValue = {
   role: Role;
