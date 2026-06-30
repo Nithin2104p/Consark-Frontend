@@ -440,6 +440,11 @@
   color: #fca5a5;
 }
 
+.status-tag.invited {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+}
+
 .employee-task-card {
   padding: 16px;
   border-radius: 16px;

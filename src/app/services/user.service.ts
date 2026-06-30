@@ -8,6 +8,7 @@ export type UserDto = {
   lastName?: string;
   roleId?: string;
   isActive?: boolean;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -59,12 +60,13 @@ export async function createUser(payload: CreateUserPayload): Promise<UserDto> {
     lastName: raw.lastName != null ? String(raw.lastName) : payload.lastName ?? undefined,
     roleId: raw.roleId != null ? String(raw.roleId) : undefined,
     isActive: raw.isActive != null ? Boolean(raw.isActive) : payload.isActive,
+    status: raw.status != null ? String(raw.status) : undefined,
     createdAt: raw.createdAt != null ? String(raw.createdAt) : undefined,
     updatedAt: raw.updatedAt != null ? String(raw.updatedAt) : undefined,
     deletedAt: raw.deletedAt != null ? String(raw.deletedAt) : null,
     location: raw.location != null ? String(raw.location) : payload.location ?? undefined,
   };
-}
+  }
 
 export async function getUsers(filters: UserFilters = {}): Promise<UsersListResponse> {
   const params: Record<string, string | number> = {};

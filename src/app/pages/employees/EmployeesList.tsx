@@ -192,8 +192,8 @@ export function EmployeesList() {
                 <div className="col-name">{formatUserName(user)}</div>
                 <div className="col-email">{user.email}</div>
                 <div className="col-status">
-                  <span className={`status-tag ${user.isActive ? "active" : "inactive"}`}>
-                    {user.isActive ? t("employees.active") : t("employees.inactive")}
+                  <span className={`status-tag ${user.status ? user.status.toLowerCase() : "active"}`}>
+                    {user.status || t("employees.active")}
                   </span>
                 </div>
               </button>
@@ -255,9 +255,9 @@ export function EmployeesList() {
                     />
                     <div>
                       <h3>{formatUserName(selectedUser)}</h3>
-                      <div className="employee-sidebar-sub">
-                        {selectedUser.isActive ? t("employees.active") : t("employees.inactive")}
-                      </div>
+                        <div className="employee-sidebar-sub">
+                          {selectedUser.status || t("employees.active")}
+                        </div>
                     </div>
                   </div>
                   <button
@@ -281,12 +281,14 @@ export function EmployeesList() {
                       <div className="k">{t("employees.sidebarName")}</div>
                       <div className="v">{formatUserName(selectedUser)}</div>
                     </div>
-                    <div className="kv">
-                      <div className="k">{t("employees.sidebarStatus")}</div>
-                      <div className="v">
-                        {selectedUser.isActive ? t("employees.active") : t("employees.inactive")}
+                      <div className="kv">
+                        <div className="k">{t("employees.sidebarStatus")}</div>
+                        <div className="v">
+                          <span className={`status-tag ${selectedUser.status ? selectedUser.status.toLowerCase() : "active"}`}>
+                            {selectedUser.status || t("employees.active")}
+                          </span>
+                        </div>
                       </div>
-                    </div>
                     <div className="kv">
                       <div className="k">{t("employees.sidebarCreated")}</div>
                       <div className="v">{formatCreatedDate(selectedUser.createdAt)}</div>

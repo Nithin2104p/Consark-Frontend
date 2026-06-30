@@ -164,6 +164,7 @@
     "addUserModalTitle": "Add User",
     "searchPlaceholder": "Search employees...",
     "active": "Active",
+    "invited": "Invited",
     "inactive": "Inactive",
     "loading": "Loading employees...",
     "loadError": "Failed to load employees.",
