@@ -1,48 +1,24 @@
-import { useEffect, useState } from "react";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useTranslation } from "../hooks/useTranslation";
 import { Card } from "./Card";
-import { getTaskCounts, type TaskCountsDto } from "../services/task.service";
+import { CHART_COLORS } from "../constants/ui";
+import type { TaskCountsDto } from "../services/task.service";
 
-type PieDataItem = {
-  key: string;
-  value: number;
-  color: string;
+type ProductivityChartProps = {
+  counts: TaskCountsDto;
 };
 
-export function ProductivityChart() {
+export function ProductivityChart({ counts }: ProductivityChartProps) {
   const { t } = useTranslation();
-  const [counts, setCounts] = useState<TaskCountsDto>({
-    totalTasks: 0,
-    openTasks: 0,
-    inProgressTasks: 0,
-    completedTasks: 0,
-  });
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const data = await getTaskCounts();
-        setCounts(data);
-      } catch {
-        // Keep default values on error
-      }
-    })();
-  }, []);
-
-  const pieData: PieDataItem[] = [
-    { key: "completed", value: counts.completedTasks, color: "#06b6d4" },
-    { key: "inProgress", value: counts.inProgressTasks, color: "#8b5cf6" },
-    { key: "open", value: counts.openTasks, color: "#ec4899" },
-  ];
+  const pieData = [
+    { key: "completed", value: counts.completedTasks, color: CHART_COLORS.completed },
+    { key: "inProgress", value: counts.inProgressTasks, color: CHART_COLORS.inProgress },
+    { key: "open", value: counts.openTasks, color: CHART_COLORS.open },
+  ] as const;
 
   return (
-    <Card title={t("cards.productivity")} actionLabel={t("actions.viewDetails")}>
+    <Card title={t("cards.productivity")}>
       <div className="globe-wrap">
         <div className="split">
           <div className="pie-wrap">

@@ -4,12 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTranslation } from "../hooks/useTranslation";
 import { useAuth } from "../auth/AuthContext";
-import { ROLES } from "../auth/permissions";
+import { ROLE_OPTIONS } from "../auth/permissions";
+import { PROFILE_CLOSE_DELAY_MS } from "../constants/ui";
 import type { Role } from "../types";
 
-function getInitial(name: string) {
+function getInitial(name: string, fallback: string) {
   const trimmed = name.trim();
-  if (!trimmed) return "?";
+  if (!trimmed) return fallback;
   const first = trimmed.split(" ")[0];
   return first.charAt(0).toUpperCase();
 }
@@ -28,11 +29,7 @@ export function Header() {
     }
   }, []);
 
-  useEffect(() => {
-    return () => {
-      clearCloseTimer();
-    };
-  }, [clearCloseTimer]);
+  useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
 
   const handleMouseEnter = useCallback(() => {
     clearCloseTimer();
@@ -40,9 +37,7 @@ export function Header() {
   }, [clearCloseTimer]);
 
   const handleMouseLeave = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setProfileOpen(false);
-    }, 120);
+    closeTimerRef.current = setTimeout(() => setProfileOpen(false), PROFILE_CLOSE_DELAY_MS);
   }, []);
 
   const handleLogout = () => {
@@ -67,7 +62,7 @@ export function Header() {
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
             >
-              {Object.values(ROLES).map((r) => (
+              {ROLE_OPTIONS.map((r) => (
                 <option key={r} value={r}>
                   {t(`roles.${r}`)}
                 </option>
@@ -88,14 +83,18 @@ export function Header() {
               aria-label={t("header.openProfileMenu")}
             >
               <span className="profile-avatar">
-                {user?.name ? getInitial(user.name) : user?.email?.charAt(0).toUpperCase()}
+                {user?.name
+                  ? getInitial(user.name, t("header.unknownInitial"))
+                  : user?.email?.charAt(0).toUpperCase()}
               </span>
             </button>
             {profileOpen && (
               <div className="profile-dropdown" role="menu">
                 <div className="profile-header">
                   <span className="profile-avatar profile-avatar--lg">
-                    {user?.name ? getInitial(user.name) : user?.email?.charAt(0).toUpperCase()}
+                    {user?.name
+                      ? getInitial(user.name, t("header.unknownInitial"))
+                      : user?.email?.charAt(0).toUpperCase()}
                   </span>
                   <span className="profile-name">{user?.name ?? t("header.userFallback")}</span>
                 </div>

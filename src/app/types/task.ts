@@ -39,3 +39,18 @@ export type TasksResponse = {
 
 export const TASK_PRIORITIES: TaskPriority[] = ["Low", "Medium", "High"];
 export const TASK_STATUSES: TaskStatus[] = ["Open", "In-Progress", "Completed"];
+
+export const DEFAULT_TASK_PRIORITY: TaskPriority = "Medium";
+export const DEFAULT_TASK_STATUS: TaskStatus = "Open";
+
+export const TASK_STATUS_I18N_KEY: Record<TaskStatus, string> = {
+  Open: "open",
+  "In-Progress": "inProgress",
+  Completed: "completed",
+};
+
+export const TASK_PRIORITY_I18N_KEY: Record<TaskPriority, string> = {
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+};

@@ -3,9 +3,13 @@ import { useSearchParams, Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { setPassword as authSetPassword } from "../../services/auth.service";
+import { useTranslation } from "../../hooks/useTranslation";
+import { MIN_PASSWORD_LENGTH, PASSWORD_PLACEHOLDER } from "../../constants/auth";
+import { ROUTES } from "../../constants/routes";
 import "./LoginPage.css";
 
 export function SetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
@@ -18,18 +22,18 @@ export function SetPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
 
   if (!token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (password.length < 6) {
-      setErrors({ password: "Password must be at least 6 characters" });
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setErrors({ password: t("auth.setPassword.minLength") });
       return;
     }
     if (password !== confirmPassword) {
-      setErrors({ confirmPassword: "Passwords do not match" });
+      setErrors({ confirmPassword: t("auth.setPassword.mismatch") });
       return;
     }
 
@@ -38,32 +42,36 @@ export function SetPasswordPage() {
 
     try {
       await authSetPassword({ token, password });
-      toast.success("Password set successfully. You can now log in.");
+      toast.success(t("auth.setPassword.successToast"));
       setSubmitted(true);
     } catch (err) {
       const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? "Failed to set password."
-        : "Failed to set password.";
+        ? (err.response?.data as { message?: string })?.message ?? t("auth.errors.setPasswordFailed")
+        : t("auth.errors.setPasswordFailed");
       toast.error(message);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const brandBlock = (
+    <div className="auth-brand">
+      <div className="logo">{t("brand.consarkInitial")}</div>
+      <div>
+        <strong>{t("brand.consarkName")}</strong>
+        <p className="small">{t("brand.tagline")}</p>
+      </div>
+    </div>
+  );
+
   if (submitted) {
     return (
       <div className="auth-page">
         <div className="auth-card">
-          <div className="auth-brand">
-            <div className="logo">C</div>
-            <div>
-              <strong>CONSARK</strong>
-              <p className="small">Task Management</p>
-            </div>
-          </div>
-          <p className="auth-success">Your password has been set.</p>
-          <Link to="/" className="btn auth-submit">
-            Go to Login
+          {brandBlock}
+          <p className="auth-success">{t("auth.setPassword.successMessage")}</p>
+          <Link to={ROUTES.LOGIN} className="btn auth-submit">
+            {t("auth.setPassword.goToLogin")}
           </Link>
         </div>
       </div>
@@ -73,68 +81,62 @@ export function SetPasswordPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-brand">
-          <div className="logo">C</div>
-          <div>
-            <strong>CONSARK</strong>
-            <p className="small">Task Management</p>
-          </div>
-        </div>
+        {brandBlock}
 
-        <h2 className="auth-title">Set Password</h2>
-        <p className="auth-desc small">Create a password for your account.</p>
+        <h2 className="auth-title">{t("auth.setPassword.title")}</h2>
+        <p className="auth-desc small">{t("auth.setPassword.description")}</p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-field">
-            <label htmlFor="password">New Password</label>
+            <label htmlFor="password">{t("auth.setPassword.newPassword")}</label>
             <div className="password-with-toggle">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={PASSWORD_PLACEHOLDER}
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.password) ? "true" : undefined}
               />
               <button
                 type="button"
                 className="password-toggle"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? t("common.hidePassword") : t("common.showPassword")}
                 onClick={() => setShowPassword((s) => !s)}
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? t("common.hide") : t("common.show")}
               </button>
             </div>
             {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
           <div className="form-field">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <label htmlFor="confirmPassword">{t("auth.setPassword.confirmPassword")}</label>
             <div className="password-with-toggle">
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={PASSWORD_PLACEHOLDER}
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.confirmPassword) ? "true" : undefined}
               />
               <button
                 type="button"
                 className="password-toggle"
-                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                aria-label={showConfirmPassword ? t("common.hideConfirmPassword") : t("common.showConfirmPassword")}
                 onClick={() => setShowConfirmPassword((s) => !s)}
               >
-                {showConfirmPassword ? "👁️" : "🙈"}
+                {showConfirmPassword ? t("common.hide") : t("common.show")}
               </button>
             </div>
             {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
           </div>
 
           <button type="submit" className="btn auth-submit" disabled={submitting}>
-            {submitting ? "Setting..." : "Set Password"}
+            {submitting ? t("auth.setPassword.submitting") : t("auth.setPassword.submit")}
           </button>
         </form>
       </div>

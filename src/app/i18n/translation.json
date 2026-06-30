@@ -1,7 +1,10 @@
 {
   "brand": {
     "name": "WorkForce",
-    "initial": "W"
+    "initial": "W",
+    "consarkInitial": "C",
+    "consarkName": "CONSARK",
+    "tagline": "Task Management"
   },
   "nav": {
     "taskDashboard": "Dashboard",
@@ -19,18 +22,32 @@
     "companyFallback": "CONSARK",
     "openProfileMenu": "Open profile menu",
     "userFallback": "User",
-    "logout": "Logout"
+    "logout": "Logout",
+    "unknownInitial": "?"
   },
   "common": {
     "loading": "Loading...",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "notAvailable": "—",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "show": "Show",
+    "hide": "Hide",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "showConfirmPassword": "Show confirm password",
+    "hideConfirmPassword": "Hide confirm password",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "previous": "Previous",
+    "next": "Next"
   },
   "page": {
     "title": "Overview",
     "dashboard": "Dashboard"
-  },
-  "actions": {
-    "viewDetails": "View Details"
   },
   "dashboard": {
     "loading": "Loading dashboard...",
@@ -55,6 +72,137 @@
     "open": "Open",
     "inProgress": "In Progress"
   },
+  "task": {
+    "status": {
+      "open": "Open",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
+  },
+  "tasks": {
+    "list": {
+      "title": "Tasks",
+      "description": "Manage and track your tasks",
+      "createTask": "Create Task",
+      "searchPlaceholder": "Search by title or description...",
+      "searchAria": "Search tasks",
+      "filterStatusAria": "Filter by status",
+      "filterPriorityAria": "Filter by priority",
+      "sortAria": "Sort tasks",
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "sortNewest": "Newest first",
+      "sortOldest": "Oldest first",
+      "sortTitleAsc": "Title A–Z",
+      "sortTitleDesc": "Title Z–A",
+      "loading": "Loading tasks...",
+      "loadError": "Failed to load tasks.",
+      "deleteSuccess": "Task deleted.",
+      "deleteError": "Failed to delete task.",
+      "emptyTitle": "No tasks found",
+      "emptySearch": "Try adjusting your search or filters.",
+      "emptyDefault": "Create your first task to get started.",
+      "colTitle": "Title",
+      "colStatus": "Status",
+      "colPriority": "Priority",
+      "colCreated": "Created",
+      "colUpdated": "Updated",
+      "colActions": "Actions",
+      "noDescription": "No description",
+      "edit": "Edit",
+      "delete": "Delete",
+      "pagination": "Page {{page}} of {{totalPages}} · {{total}} total",
+      "deleteModalTitle": "Delete Task",
+      "deleteModalBody": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone."
+    },
+    "create": {
+      "title": "Create Task",
+      "description": "Add a new task to your workspace",
+      "submit": "Create Task",
+      "success": "Task created successfully.",
+      "error": "Failed to create task.",
+      "fixFields": "Please fix the highlighted fields."
+    },
+    "edit": {
+      "title": "Edit Task",
+      "description": "Update task details",
+      "submit": "Save Changes",
+      "loading": "Loading task...",
+      "loadError": "Failed to load task.",
+      "success": "Task updated successfully.",
+      "error": "Failed to update task.",
+      "fixFields": "Please fix the highlighted fields."
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Enter task title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter task description",
+      "priority": "Priority",
+      "status": "Status",
+      "assignee": "Assignee"
+    },
+    "assignee": {
+      "self": "Self",
+      "unassigned": "Unassigned",
+      "searchPlaceholder": "Search users...",
+      "empty": "No users found",
+      "loading": "Loading...",
+      "scrollForMore": "Scroll for more",
+      "endOfList": "End of list"
+    }
+  },
+  "employees": {
+    "title": "Employees",
+    "description": "Manage team members and employee records.",
+    "createUser": "Create User",
+    "searchPlaceholder": "Search employees...",
+    "active": "Active",
+    "inactive": "Inactive",
+    "loading": "Loading employees...",
+    "loadError": "Failed to load employees.",
+    "createSuccess": "User created successfully.",
+    "createError": "Failed to create user.",
+    "noEmployees": "No employees found",
+    "colName": "Name",
+    "colEmail": "Email",
+    "colStatus": "Status",
+    "colLocation": "Location",
+    "colActions": "Actions",
+    "viewTasks": "View Tasks",
+    "formFirstName": "First name",
+    "formLastName": "Last name",
+    "formEmail": "Email",
+    "formPassword": "Password",
+    "formCompany": "Company name",
+    "formLocation": "Location",
+    "formActive": "Active user",
+    "submitCreate": "Create User",
+    "panelTitle": "Employee Tasks",
+    "noTasks": "No tasks assigned",
+    "closePanel": "Close panel"
+  },
+  "config": {
+    "title": "Configuration",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose how you want to receive notifications."
+    },
+    "roles": {
+      "title": "Custom roles",
+      "description": "Create a custom role and enable a few permissions.",
+      "nameLabel": "Role name",
+      "namePlaceholder": "e.g. Compliance reviewer",
+      "permissionsTitle": "Enable permissions",
+      "createButton": "Create custom role",
+      "createdTitle": "Created roles"
+    }
+  },
   "roles": {
     "super_admin": "Super Admin",
     "superAdmin": "Super Admin",
@@ -66,7 +214,57 @@
     "roleLabel": "Role",
     "unauthorizedTitle": "Access denied",
     "unauthorizedMessage": "Your role does not have permission to view this page.",
-    "backToTasks": "Check your Tasks"
+    "backToTasks": "Check your Tasks",
+    "login": {
+      "tab": "Login",
+      "email": "Email",
+      "password": "Password",
+      "company": "Company",
+      "emailPlaceholder": "you@example.com",
+      "passwordPlaceholder": "••••••••",
+      "selectCompany": "Select your company",
+      "signingInTo": "Signing in to {{company}}",
+      "terms": "By continuing you agree to CONSARK workspace policies",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "welcomeBack": "Welcome back!",
+      "invalidEmail": "Enter a valid email address",
+      "noCompanies": "No companies found for this email",
+      "fixFields": "Please fix the highlighted fields.",
+      "acceptTerms": "Please accept the terms and conditions",
+      "authFailed": "Authentication failed."
+    },
+    "signup": {
+      "tab": "Sign up",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "companyName": "Company name",
+      "confirmPassword": "Confirm Password",
+      "firstNamePlaceholder": "John",
+      "lastNamePlaceholder": "optional",
+      "companyPlaceholder": "Acme Corp",
+      "submit": "Sign up",
+      "submitting": "Signing up...",
+      "success": "Account created successfully!"
+    },
+    "setPassword": {
+      "title": "Set Password",
+      "description": "Create a password for your account.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Set Password",
+      "submitting": "Setting...",
+      "successToast": "Password set successfully. You can now log in.",
+      "successMessage": "Your password has been set.",
+      "goToLogin": "Go to Login",
+      "minLength": "Password must be at least 6 characters",
+      "mismatch": "Passwords do not match"
+    },
+    "errors": {
+      "loadCompaniesFailed": "Failed to load companies.",
+      "setPasswordFailed": "Failed to set password.",
+      "noToken": "Authentication response did not include a token."
+    }
   },
   "pages": {
     "employees": {

@@ -1,6 +1,5 @@
-import { AuthPage } from "./AuthPage";
+import { LoginPage } from "./LoginPage";
 
 export function SignupPage() {
-    return <AuthPage />;
+  return <LoginPage defaultMode="signup" />;
 }
-

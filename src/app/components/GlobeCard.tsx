@@ -5,7 +5,14 @@ import { getUsers } from "../services/user.service";
 import { COUNTRY_COORDINATES, COUNTRY_COLORS, ARC_COLORS } from "../data/countryCoordinates";
 import { useTranslation } from "../hooks/useTranslation";
 import { Card } from "./Card";
-import { GLOBE_IMAGE } from "./constants";
+import {
+  GLOBE_AUTO_ROTATE_SPEED,
+  GLOBE_DEFAULT_POINT_COLOR,
+  GLOBE_IMAGE,
+  GLOBE_POINT_OFFSET_FACTOR,
+  GLOBE_POINT_SIZE,
+  GLOBE_USER_FETCH_LIMIT,
+} from "../constants/ui";
 import { getUserCount } from "../services/user.service";
 import "./GlobeCard.css";
 
@@ -35,7 +42,7 @@ export function GlobeCard() {
   const handleGlobeReady = () => {
     if (globeRef.current) {
       globeRef.current.controls().autoRotate = true;
-      globeRef.current.controls().autoRotateSpeed = 0.5;
+      globeRef.current.controls().autoRotateSpeed = GLOBE_AUTO_ROTATE_SPEED;
     }
   };
 
@@ -57,7 +64,7 @@ export function GlobeCard() {
   useEffect(() => {
     void (async () => {
       try {
-        const res = await getUsers({ limit: 1000 });
+        const res = await getUsers({ limit: GLOBE_USER_FETCH_LIMIT });
         setUsers(res.users);
       } catch {
         // keep empty on error
@@ -71,7 +78,7 @@ export function GlobeCard() {
       const coords = country ? COUNTRY_COORDINATES[country] : null;
       if (!coords) return null;
 
-      const offsetFactor = (parseInt(u._id.slice(-2), 16) % 10 - 5) * 0.02;
+      const offsetFactor = (parseInt(u._id.slice(-2), 16) % 10 - 5) * GLOBE_POINT_OFFSET_FACTOR;
       const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email;
 
       return {
@@ -81,8 +88,8 @@ export function GlobeCard() {
         country,
         lat: coords.lat + offsetFactor,
         lng: coords.lng + offsetFactor,
-        size: 0.4,
-        color: (COUNTRY_COLORS as Record<string, string>)[country!] || "#8b5cf6",
+        size: GLOBE_POINT_SIZE,
+        color: (COUNTRY_COLORS as Record<string, string>)[country!] || GLOBE_DEFAULT_POINT_COLOR,
       };
     })
     .filter(Boolean) as any[];
@@ -135,7 +142,6 @@ export function GlobeCard() {
               pointAltitude={0.01}
               pointRadius="size"
               onPointHover={(p) => setHoveredUser(p || null)}
-              onPointClick={(p) => console.log("Clicked user", p)}
               atmosphereColor="#8b5cf6"
               atmosphereAltitude={0.2}
               onGlobeReady={handleGlobeReady}
@@ -144,7 +150,7 @@ export function GlobeCard() {
         </div>
 
         {hoveredUser && (
-          <div className="employee-tooltip glass">
+          <div className="employee-tooltip">
             <div className="tooltip-body">
               <div className="tooltip-name">{hoveredUser.name}</div>
               <div className="tooltip-country">{hoveredUser.country}</div>
@@ -156,7 +162,7 @@ export function GlobeCard() {
           <div className="globe-stat">
             <div className="small">{t("globe.employeesWorldwide")}</div>
             <div className="stat-value purple">
-              <Users size={16} /> {userCount != null ? userCount.toLocaleString() : "—"}
+              <Users size={16} /> {userCount != null ? userCount.toLocaleString() : t("common.notAvailable")}
             </div>
           </div>
         </div>

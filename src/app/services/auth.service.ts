@@ -1,7 +1,6 @@
 import { apiClient, TOKEN_KEY } from "./client";
+import { USER_KEY } from "../constants/storage";
 import type { AuthUser, LoginCredentials, SignupCredentials } from "../types/auth";
-
-const USER_KEY = "consark_user";
 
 type AuthResponse = {
   statusCode?: number;
@@ -20,9 +19,23 @@ type AuthResponse = {
 function extractToken(data: AuthResponse): string {
   const token = data.token ?? data.accessToken ?? data.data?.token ?? data.data?.accessToken;
   if (!token) {
-    throw new Error("Authentication response did not include a token.");
+    throw new Error("AUTH_NO_TOKEN");
   }
   return token;
+}
+
+function persistAuth(token: string, user?: AuthUser) {
+  localStorage.setItem(TOKEN_KEY, token);
+  if (user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+}
+
+function completeAuth(data: AuthResponse, fallback: AuthUser): AuthUser {
+  const token = extractToken(data);
+  const user = data.user ?? data.data?.user ?? fallback;
+  persistAuth(token, user);
+  return user;
 }
 
 export function getStoredToken(): string | null {
@@ -39,24 +52,14 @@ export function getStoredUser(): AuthUser | null {
   }
 }
 
-export function clearAuthStorage() {
+function clearAuthStorage() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 }
 
-function persistAuth(token: string, user?: AuthUser) {
-  localStorage.setItem(TOKEN_KEY, token);
-  if (user) {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
-}
-
 export async function login(credentials: LoginCredentials): Promise<AuthUser> {
   const { data } = await apiClient.post<AuthResponse>("/auth/login", credentials);
-  const token = extractToken(data);
-  const user = data.user ?? data.data?.user;
-  persistAuth(token, user);
-  return user ?? { email: credentials.email };
+  return completeAuth(data, { email: credentials.email });
 }
 
 export async function signup(credentials: SignupCredentials): Promise<AuthUser> {
@@ -67,11 +70,7 @@ export async function signup(credentials: SignupCredentials): Promise<AuthUser> 
     password: credentials.password,
     companyName: credentials.companyName,
   });
-
-  const token = extractToken(data);
-  const user = data.user ?? data.data?.user;
-  persistAuth(token, user);
-  return user ?? { email: credentials.email, name: credentials.firstName };
+  return completeAuth(data, { email: credentials.email, name: credentials.firstName });
 }
 
 type SetPasswordPayload = {
@@ -92,11 +91,11 @@ export async function setPassword(payload: SetPasswordPayload): Promise<void> {
   });
 
   if (!data.success) {
-    throw new Error(data.message ?? "Failed to set password.");
+    throw new Error(data.message ?? "AUTH_SET_PASSWORD_FAILED");
   }
 }
 
-type CompanyDto = {
+export type CompanyDto = {
   _id: string;
   name: string;
   [key: string]: unknown;
@@ -115,7 +114,7 @@ export async function getUserCompaniesByEmail(email: string): Promise<CompanyDto
   });
 
   if (!data.success || !Array.isArray(data.data)) {
-    throw new Error(data.message ?? "Failed to load companies.");
+    throw new Error(data.message ?? "AUTH_LOAD_COMPANIES_FAILED");
   }
 
   return data.data;

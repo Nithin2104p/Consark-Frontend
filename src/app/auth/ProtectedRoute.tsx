@@ -2,13 +2,23 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { canAccess } from "./permissions";
 import { useTranslation } from "../hooks/useTranslation";
+import { ROUTES } from "../constants/routes";
 import type { ProtectedRouteProps } from "../types";
+
+function AuthLoadingFallback() {
+  const { t } = useTranslation();
+  return (
+    <div className="page center">
+      <p className="muted">{t("common.loading")}</p>
+    </div>
+  );
+}
 
 export function ProtectedRoute({ routeId, children }: ProtectedRouteProps) {
   const { role } = useAuth();
 
   if (!canAccess(role, routeId)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to={ROUTES.UNAUTHORIZED} replace />;
   }
 
   return <>{children}</>;
@@ -17,23 +27,14 @@ export function ProtectedRoute({ routeId, children }: ProtectedRouteProps) {
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, authLoading } = useAuth();
   const location = useLocation();
-  const { t } = useTranslation();
 
   if (authLoading) {
-    return (
-      <div className="page center">
-        <p className="muted">{t("common.loading")}</p>
-      </div>
-    );
+    return <AuthLoadingFallback />;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+    return <Navigate to={ROUTES.LOGIN} replace state={{ from: location.pathname }} />;
   }
-
-  // Extra safety: role/permissions gate already applies, but unauthenticated users
-  // must never see protected routes.
-
 
   return <>{children}</>;
 }
@@ -51,7 +52,7 @@ export function GuestOnly({ children }: { children: React.ReactNode }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return <>{children}</>;

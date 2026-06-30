@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
+import { useTranslation } from "../../hooks/useTranslation";
+import { SEARCH_DEBOUNCE_MS, SCROLL_LOAD_THRESHOLD_PX } from "../../constants/ui";
 
 type UserOption = { id: string; name: string };
 
@@ -23,24 +25,19 @@ export function AssigneeSelect({
   searchQuery,
   onSearchChange,
 }: AssigneeSelectProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
   }, []);
 
   const handleToggle = useCallback(() => {
     setOpen((prev) => {
-      if (!prev) {
-        setLocalSearch(searchQuery);
-      }
+      if (!prev) setLocalSearch(searchQuery);
       return !prev;
     });
   }, [searchQuery]);
@@ -52,9 +49,7 @@ export function AssigneeSelect({
       }
     };
     const handleEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
+      if (event.key === "Escape") setOpen(false);
     };
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -68,15 +63,10 @@ export function AssigneeSelect({
 
   const handleSearchChange = useCallback(
     (e: FormEvent<HTMLInputElement>) => {
-      const target = e.target as HTMLInputElement;
-      const query = target.value;
+      const query = (e.target as HTMLInputElement).value;
       setLocalSearch(query);
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-        onSearchChange(query);
-      }, 250);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => onSearchChange(query), SEARCH_DEBOUNCE_MS);
     },
     [onSearchChange]
   );
@@ -84,7 +74,7 @@ export function AssigneeSelect({
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const el = e.currentTarget;
-      if (!loading && hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+      if (!loading && hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - SCROLL_LOAD_THRESHOLD_PX) {
         onLoadMore();
       }
     },
@@ -92,49 +82,34 @@ export function AssigneeSelect({
   );
 
   const selectedUser = users.find((u) => u.id === value);
-  const displayLabel = value === "self" ? "Self" : selectedUser ? selectedUser.name : "Unassigned";
+  const displayLabel =
+    value === "self"
+      ? t("tasks.assignee.self")
+      : selectedUser
+        ? selectedUser.name
+        : t("tasks.assignee.unassigned");
 
   return (
     <div className="assignee-dropdown" ref={rootRef}>
-      <button
-        type="button"
-        className="assignee-trigger"
-        onClick={handleToggle}
-      >
+      <button type="button" className="assignee-trigger" onClick={handleToggle}>
         <span className="assignee-trigger-text">{displayLabel}</span>
-        <svg
-          className="assignee-chevron"
-          width="16"
-          height="16"
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
+        <svg className="assignee-chevron" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M6 8l4 4 4-4" />
         </svg>
       </button>
       {open && (
         <div className="assignee-menu">
           <div className="assignee-search">
-            <svg
-              className="assignee-search-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg className="assignee-search-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="9" cy="9" r="6" />
               <path d="M15 15l4 4" />
             </svg>
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={localSearch}
-            onChange={handleSearchChange}
-          />
+            <input
+              type="text"
+              placeholder={t("tasks.assignee.searchPlaceholder")}
+              value={localSearch}
+              onChange={handleSearchChange}
+            />
           </div>
           <div className="assignee-list" onScroll={handleScroll}>
             <button
@@ -145,10 +120,10 @@ export function AssigneeSelect({
                 setOpen(false);
               }}
             >
-              Self
+              {t("tasks.assignee.self")}
             </button>
             {users.length === 0 && !loading && (
-              <div className="assignee-empty">No users found</div>
+              <div className="assignee-empty">{t("tasks.assignee.empty")}</div>
             )}
             {users.map((user) => (
               <button
@@ -163,12 +138,10 @@ export function AssigneeSelect({
                 {user.name}
               </button>
             ))}
-            {loading && <div className="assignee-loading">Loading...</div>}
-            {!loading && hasMore && (
-              <div className="assignee-load-more">Scroll for more</div>
-            )}
+            {loading && <div className="assignee-loading">{t("tasks.assignee.loading")}</div>}
+            {!loading && hasMore && <div className="assignee-load-more">{t("tasks.assignee.scrollForMore")}</div>}
             {!loading && !hasMore && users.length > 0 && (
-              <div className="assignee-end">End of list</div>
+              <div className="assignee-end">{t("tasks.assignee.endOfList")}</div>
             )}
           </div>
         </div>

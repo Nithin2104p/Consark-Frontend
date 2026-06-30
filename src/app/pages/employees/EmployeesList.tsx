@@ -1,8 +1,11 @@
-import { useMemo, useState, useEffect, type FormEvent } from "react";
+import { useMemo, useState, useEffect, useCallback, type FormEvent } from "react";
 import axios from "axios";
 import { getUsers, createUser, getUserById, type UserDto, type CreateUserPayload } from "../../services/user.service";
 import { useTranslation } from "../../hooks/useTranslation";
 import { toast } from "react-toastify";
+import { EMPLOYEES_PAGE_SIZE } from "../../constants/pagination";
+import { AVATAR_PLACEHOLDER_BASE } from "../../constants/ui";
+import { ROLES } from "../../auth/permissions";
 import { COUNTRY_OPTIONS } from "../../data/countryCoordinates";
 import "./EmployeesList.css";
 
@@ -20,9 +23,9 @@ export function EmployeesList() {
   const [users, setUsers] = useState<UserDto[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const limit = 7;
+  const limit = EMPLOYEES_PAGE_SIZE;
 
-  const refreshUsers = async () => {
+  const refreshUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -30,27 +33,15 @@ export function EmployeesList() {
       setUsers(next.users);
       setTotalPages(next.pagination.totalPages);
     } catch {
-      setError("Failed to load users.");
+      setError(t("employees.loadError"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, t]);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const next = await getUsers({ page, limit });
-        setUsers(next.users);
-        setTotalPages(next.pagination.totalPages);
-      } catch {
-        setError("Failed to load users.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [page]);
+    void refreshUsers();
+  }, [refreshUsers]);
 
   useEffect(() => {
     if (!selectedUserId) {
@@ -70,7 +61,6 @@ export function EmployeesList() {
     })();
   }, [selectedUserId]);
 
-  const visibleUsers = users;
   const safePage = Math.min(page, totalPages);
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -81,7 +71,7 @@ export function EmployeesList() {
     password: "",
     companyName: "",
     isActive: true,
-    roleId: "employee",
+    roleId: ROLES.EMPLOYEE,
     location: "",
   });
   const [userErrors, setUserErrors] = useState<Record<string, string>>({});
@@ -110,7 +100,7 @@ export function EmployeesList() {
       await createUser(userForm);
       toast.success("User created successfully.");
       setShowAddUserModal(false);
-      setUserForm({ firstName: "", lastName: "", email: "", password: "", companyName: "", isActive: true, roleId: "employee", location: "" });
+      setUserForm({ firstName: "", lastName: "", email: "", password: "", companyName: "", isActive: true, roleId: ROLES.EMPLOYEE, location: "" });
       await refreshUsers();
     } catch (err) {
       const message = axios.isAxiosError(err)
@@ -134,7 +124,7 @@ export function EmployeesList() {
   }
 
   function formatDate(value: string | undefined) {
-    if (!value) return "—";
+    if (!value) return t("common.notAvailable");
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return date.toLocaleDateString(undefined, {
@@ -167,11 +157,11 @@ export function EmployeesList() {
           <p className="muted page-desc">{t("pages.employees.description")}</p>
         </div>
         <button className="btn btn-add-user" type="button" onClick={() => setShowAddUserModal(true)}>
-          Add User
+          {t("employees.createUser")}
         </button>
       </div>
 
-      {loading && <p className="muted">Loading users...</p>}
+      {loading && <p className="muted">{t("employees.loading")}</p>}
       {!loading && error && <p className="muted">{error}</p>}
 
 
@@ -185,7 +175,7 @@ export function EmployeesList() {
               <div className="col-status">Status</div>
             </div>
 
-            {visibleUsers.map((user) => (
+            {users.map((user) => (
               <button
                 type="button"
                 key={user._id}
@@ -205,7 +195,7 @@ export function EmployeesList() {
                 <div className="col-avatar">
                   <img
                     className="employee-avatar"
-                    src={"https://i.pravatar.cc/150?u=" + encodeURIComponent(user._id)}
+                    src={AVATAR_PLACEHOLDER_BASE + encodeURIComponent(user._id)}
                     alt={formatName(user)}
                   />
                 </div>
@@ -213,7 +203,7 @@ export function EmployeesList() {
                 <div className="col-email">{user.email}</div>
                 <div className="col-status">
                   <span className={`status-tag ${user.isActive ? "active" : "inactive"}`}>
-                    {user.isActive ? "Active" : "Inactive"}
+                    {user.isActive ? t("employees.active") : t("employees.inactive")}
                   </span>
                 </div>
               </button>
@@ -226,7 +216,7 @@ export function EmployeesList() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={safePage <= 1}
             >
-              Prev
+              {t("common.previous")}
             </button>
 
             <div className="employees-pagination-pages">
@@ -247,7 +237,7 @@ export function EmployeesList() {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage >= totalPages}
             >
-              Next
+              {t("common.next")}
             </button>
           </div>
 

@@ -9,19 +9,29 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { PriorityBadge } from "../../components/PriorityBadge";
 import { StatusBadge } from "../../components/StatusBadge";
-import { TASK_PRIORITIES, TASK_STATUSES, type Task, type TaskPriority, type TaskStatus } from "../../types/task";
+import { useTranslation } from "../../hooks/useTranslation";
+import { DEFAULT_TASK_SORT, TASK_PAGE_SIZE } from "../../constants/pagination";
+import { ROUTES } from "../../constants/routes";
+import {
+  TASK_PRIORITIES,
+  TASK_PRIORITY_I18N_KEY,
+  TASK_STATUSES,
+  TASK_STATUS_I18N_KEY,
+  type Task,
+  type TaskPriority,
+  type TaskStatus,
+} from "../../types/task";
 import "./TasksPage.css";
 
-const PAGE_SIZE = 8;
-
-function formatDate(value: string) {
-  if (!value) return "—";
+function formatDate(value: string, fallback: string) {
+  if (!value) return fallback;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
 export function TaskListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [total, setTotal] = useState(0);
@@ -31,7 +41,7 @@ export function TaskListPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "">("");
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "">("");
-  const [sort, setSort] = useState("-createdAt");
+  const [sort, setSort] = useState(DEFAULT_TASK_SORT);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null);
 
@@ -44,40 +54,30 @@ export function TaskListPage() {
         status: statusFilter || undefined,
         priority: priorityFilter || undefined,
         page,
-        limit: PAGE_SIZE,
+        limit: TASK_PAGE_SIZE,
         sort,
       });
       setTasks(response.Tasks);
       setTotal(response.total);
     } catch (err) {
       const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? "Failed to load tasks."
-        : "Failed to load tasks.";
+        ? (err.response?.data as { message?: string })?.message ?? t("tasks.list.loadError")
+        : t("tasks.list.loadError");
       setError(message);
     } finally {
       setLoading(false);
     }
-  }, [page, search, priorityFilter, sort, statusFilter]);
+  }, [page, search, priorityFilter, sort, statusFilter, t]);
 
   useEffect(() => {
-    void (async () => {
-      await loadTasks();
-    })();
+    void loadTasks();
   }, [loadTasks]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => setPage(1));
+    setPage(1);
   }, [search, statusFilter, priorityFilter, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  const handleDeleteClick = (task: Task) => {
-    setDeleteTarget(task);
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteTarget(null);
-  };
+  const totalPages = Math.max(1, Math.ceil(total / TASK_PAGE_SIZE));
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
@@ -85,7 +85,7 @@ export function TaskListPage() {
     setDeleteTarget(null);
     try {
       await deleteTask(deleteTarget.id);
-      toast.success("Task deleted.");
+      toast.success(t("tasks.list.deleteSuccess"));
       if (tasks.length === 1 && page > 1) {
         setPage((current) => current - 1);
       } else {
@@ -93,8 +93,8 @@ export function TaskListPage() {
       }
     } catch (err) {
       const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? "Failed to delete task."
-        : "Failed to delete task.";
+        ? (err.response?.data as { message?: string })?.message ?? t("tasks.list.deleteError")
+        : t("tasks.list.deleteError");
       toast.error(message);
     } finally {
       setDeletingId(null);
@@ -106,11 +106,11 @@ export function TaskListPage() {
       <div className="tasks-page">
         <div className="tasks-header">
           <div>
-            <h1>Tasks</h1>
-            <p className="page-desc muted">Manage and track your tasks</p>
+            <h1>{t("tasks.list.title")}</h1>
+            <p className="page-desc muted">{t("tasks.list.description")}</p>
           </div>
-          <Link to="/tasks/new" className="btn">
-            Create Task
+          <Link to={ROUTES.TASKS_NEW} className="btn">
+            {t("tasks.list.createTask")}
           </Link>
         </div>
 
@@ -119,22 +119,22 @@ export function TaskListPage() {
             <Search size={16} />
             <input
               type="search"
-              placeholder="Search by title or description..."
+              placeholder={t("tasks.list.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search tasks"
+              aria-label={t("tasks.list.searchAria")}
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TaskStatus | "")}
-            aria-label="Filter by status"
+            aria-label={t("tasks.list.filterStatusAria")}
           >
-            <option value="">All statuses</option>
+            <option value="">{t("tasks.list.allStatuses")}</option>
             {TASK_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {status}
+                {t(`task.status.${TASK_STATUS_I18N_KEY[status]}`)}
               </option>
             ))}
           </select>
@@ -142,51 +142,51 @@ export function TaskListPage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as TaskPriority | "")}
-            aria-label="Filter by priority"
+            aria-label={t("tasks.list.filterPriorityAria")}
           >
-            <option value="">All priorities</option>
+            <option value="">{t("tasks.list.allPriorities")}</option>
             {TASK_PRIORITIES.map((priority) => (
               <option key={priority} value={priority}>
-                {priority}
+                {t(`task.priority.${TASK_PRIORITY_I18N_KEY[priority]}`)}
               </option>
             ))}
           </select>
 
-          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort tasks">
-            <option value="-createdAt">Newest first</option>
-            <option value="createdAt">Oldest first</option>
-            <option value="title">Title A–Z</option>
-            <option value="-title">Title Z–A</option>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t("tasks.list.sortAria")}>
+            <option value="-createdAt">{t("tasks.list.sortNewest")}</option>
+            <option value="createdAt">{t("tasks.list.sortOldest")}</option>
+            <option value="title">{t("tasks.list.sortTitleAsc")}</option>
+            <option value="-title">{t("tasks.list.sortTitleDesc")}</option>
           </select>
         </div>
 
-        {loading && <LoadingState message="Loading tasks..." />}
+        {loading && <LoadingState message={t("tasks.list.loading")} />}
         {!loading && error && <ErrorState message={error} onRetry={loadTasks} />}
         {!loading && !error && tasks.length === 0 && (
           <EmptyState
-            title="No tasks found"
-            description={search ? "Try adjusting your search or filters." : "Create your first task to get started."}
-            actionLabel="Create Task"
-            onAction={() => navigate("/tasks/new")}
+            title={t("tasks.list.emptyTitle")}
+            description={search ? t("tasks.list.emptySearch") : t("tasks.list.emptyDefault")}
+            actionLabel={t("tasks.list.createTask")}
+            onAction={() => navigate(ROUTES.TASKS_NEW)}
           />
         )}
 
         {!loading && !error && tasks.length > 0 && (
           <div className="tasks-table">
             <div className="table-header">
-              <span>Title</span>
-              <span>Status</span>
-              <span>Priority</span>
-              <span>Created</span>
-              <span>Updated</span>
-              <span>Actions</span>
+              <span>{t("tasks.list.colTitle")}</span>
+              <span>{t("tasks.list.colStatus")}</span>
+              <span>{t("tasks.list.colPriority")}</span>
+              <span>{t("tasks.list.colCreated")}</span>
+              <span>{t("tasks.list.colUpdated")}</span>
+              <span>{t("tasks.list.colActions")}</span>
             </div>
 
             {tasks.map((task) => (
               <div key={task.id} className="table-row">
                 <div className="task-title-cell">
                   <strong>{task.title}</strong>
-                  <span>{task.description || "No description"}</span>
+                  <span>{task.description || t("tasks.list.noDescription")}</span>
                 </div>
                 <div>
                   <StatusBadge status={task.status} />
@@ -194,23 +194,23 @@ export function TaskListPage() {
                 <div>
                   <PriorityBadge priority={task.priority} />
                 </div>
-                <div className="small">{formatDate(task.createdAt)}</div>
-                <div className="small">{formatDate(task.updatedAt)}</div>
+                <div className="small">{formatDate(task.createdAt, t("common.notAvailable"))}</div>
+                <div className="small">{formatDate(task.updatedAt, t("common.notAvailable"))}</div>
                 <div className="row-actions">
                   <button
                     type="button"
                     className="action-btn edit-btn"
                     onClick={() => navigate(`/tasks/${task.id}/edit`)}
                   >
-                    Edit
+                    {t("tasks.list.edit")}
                   </button>
                   <button
                     type="button"
                     className="action-btn delete-btn"
                     disabled={deletingId === task.id}
-                    onClick={() => handleDeleteClick(task)}
+                    onClick={() => setDeleteTarget(task)}
                   >
-                    {deletingId === task.id ? "Deleting..." : "Delete"}
+                    {deletingId === task.id ? t("common.deleting") : t("tasks.list.delete")}
                   </button>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export function TaskListPage() {
 
             <div className="tasks-pagination">
               <span className="small">
-                Page {page} of {totalPages} · {total} total
+                {t("tasks.list.pagination", { page, totalPages, total })}
               </span>
               <div className="pagination-controls">
                 <button
@@ -227,7 +227,7 @@ export function TaskListPage() {
                   disabled={page <= 1}
                   onClick={() => setPage((current) => current - 1)}
                 >
-                  Previous
+                  {t("common.previous")}
                 </button>
                 <button
                   type="button"
@@ -235,7 +235,7 @@ export function TaskListPage() {
                   disabled={page >= totalPages}
                   onClick={() => setPage((current) => current + 1)}
                 >
-                  Next
+                  {t("common.next")}
                 </button>
               </div>
             </div>
@@ -245,49 +245,28 @@ export function TaskListPage() {
 
       {deleteTarget && (
         <>
-          <div
-            className="modal-backdrop"
-            onClick={handleCancelDelete}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleCancelDelete();
-              }
-            }}
-          />
+          <div className="modal-backdrop" onClick={() => setDeleteTarget(null)} role="presentation" />
           <div className="delete-confirm-modal">
             <div className="delete-confirm-header">
-              <h3>Delete Task</h3>
+              <h3>{t("tasks.list.deleteModalTitle")}</h3>
               <button
                 type="button"
                 className="modal-close"
-                onClick={handleCancelDelete}
-                aria-label="Close"
+                onClick={() => setDeleteTarget(null)}
+                aria-label={t("common.close")}
               >
                 ×
               </button>
             </div>
             <div className="delete-confirm-body">
-              Are you sure you want to delete "{deleteTarget.title}"? This action cannot be undone.
+              {t("tasks.list.deleteModalBody", { title: deleteTarget.title })}
             </div>
             <div className="delete-confirm-actions">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCancelDelete}
-                disabled={deletingId === deleteTarget.id}
-              >
-                Cancel
+              <button type="button" className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>
+                {t("common.cancel")}
               </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={handleConfirmDelete}
-                disabled={deletingId === deleteTarget.id}
-              >
-                {deletingId === deleteTarget.id ? "Deleting..." : "Confirm"}
+              <button type="button" className="btn btn-danger" onClick={handleConfirmDelete}>
+                {t("common.confirm")}
               </button>
             </div>
           </div>

@@ -1,13 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { GuestOnly, ProtectedRoute, RequireAuth } from "../auth/ProtectedRoute";
 import { AppLayout } from "../layout/AppLayout";
+import { ROUTES } from "../constants/routes";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignupPage } from "../pages/auth/SignupPage";
 import { SetPasswordPage } from "../pages/auth/SetPasswordPage";
-import { OverviewPage } from "../pages/OverviewPage";
-
+import { Dashboard } from "../pages/overview/Dashboard";
 import { ConfigPage } from "../pages/config/ConfigPage";
-import { SimplePage } from "../pages/SimplePage";
+import { EmployeesList } from "../pages/employees/EmployeesList";
 import { CreateTaskPage } from "../pages/tasks/CreateTaskPage";
 import { EditTaskPage } from "../pages/tasks/EditTaskPage";
 import { TaskListPage } from "../pages/tasks/TaskListPage";
@@ -18,44 +18,35 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route
-          path="/"
+          path={ROUTES.LOGIN}
           element={
             <GuestOnly>
               <LoginPage />
             </GuestOnly>
           }
         />
+        <Route
+          path={ROUTES.SIGNUP}
+          element={
+            <GuestOnly>
+              <SignupPage />
+            </GuestOnly>
+          }
+        />
+        <Route
+          path={ROUTES.SET_PASSWORD}
+          element={
+            <GuestOnly>
+              <SetPasswordPage />
+            </GuestOnly>
+          }
+        />
 
-         <Route
-           path="signup"
-           element={
-             <GuestOnly>
-               <SignupPage />
-             </GuestOnly>
-           }
-         />
-         <Route
-           path="set-password"
-           element={
-             <GuestOnly>
-               <SetPasswordPage />
-             </GuestOnly>
-           }
-         />
-
-         <Route element={<AppLayout />}>
-           <Route
-             index
-             path="overview"
-             element={<OverviewPage />}
-           />
-           <Route
-             path="dashboard"
-             element={<OverviewPage />}
-           />
-
+        <Route element={<AppLayout />}>
+          <Route path={ROUTES.OVERVIEW} element={<Dashboard />} />
+          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route
-            path="tasks"
+            path={ROUTES.TASKS}
             element={
               <RequireAuth>
                 <TaskListPage />
@@ -63,7 +54,7 @@ export function AppRouter() {
             }
           />
           <Route
-            path="tasks/new"
+            path={ROUTES.TASKS_NEW}
             element={
               <RequireAuth>
                 <CreateTaskPage />
@@ -71,7 +62,7 @@ export function AppRouter() {
             }
           />
           <Route
-            path="tasks/:id/edit"
+            path="/tasks/:id/edit"
             element={
               <RequireAuth>
                 <EditTaskPage />
@@ -79,15 +70,15 @@ export function AppRouter() {
             }
           />
           <Route
-            path="employees"
+            path={ROUTES.EMPLOYEES}
             element={
               <ProtectedRoute routeId="employees">
-                <SimplePage titleKey="pages.employees.title" descriptionKey="pages.employees.description" />
+                <EmployeesList />
               </ProtectedRoute>
             }
           />
           <Route
-            path="config"
+            path={ROUTES.CONFIG}
             element={
               <ProtectedRoute routeId="settings">
                 <ConfigPage />
@@ -96,8 +87,8 @@ export function AppRouter() {
           />
         </Route>
 
-        <Route path="unauthorized" element={<UnauthorizedPage />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path={ROUTES.UNAUTHORIZED} element={<UnauthorizedPage />} />
+        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,4 +1,5 @@
-import type { TaskPriority } from "../types/task";
+import { useTranslation } from "../hooks/useTranslation";
+import { TASK_PRIORITY_I18N_KEY, type TaskPriority } from "../types/task";
 
 const priorityClass: Record<TaskPriority, string> = {
   Low: "gray",
@@ -11,5 +12,10 @@ type PriorityBadgeProps = {
 };
 
 export function PriorityBadge({ priority }: PriorityBadgeProps) {
-  return <span className={`tag ${priorityClass[priority]}`}>{priority}</span>;
+  const { t } = useTranslation();
+  return (
+    <span className={`tag ${priorityClass[priority]}`}>
+      {t(`task.priority.${TASK_PRIORITY_I18N_KEY[priority]}`)}
+    </span>
+  );
 }

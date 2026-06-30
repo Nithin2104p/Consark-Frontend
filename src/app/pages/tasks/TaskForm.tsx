@@ -1,5 +1,14 @@
 import type { FormEvent } from "react";
-import { TASK_PRIORITIES, TASK_STATUSES, type TaskInput } from "../../types/task";
+import {
+  DEFAULT_TASK_PRIORITY,
+  DEFAULT_TASK_STATUS,
+  TASK_PRIORITIES,
+  TASK_PRIORITY_I18N_KEY,
+  TASK_STATUSES,
+  TASK_STATUS_I18N_KEY,
+  type TaskInput,
+} from "../../types/task";
+import { useTranslation } from "../../hooks/useTranslation";
 import { AssigneeSelect } from "./AssigneeSelect";
 
 export type TaskFormState = TaskInput;
@@ -37,28 +46,30 @@ export function TaskForm({
   assigneeSearchQuery = "",
   onAssigneeSearchChange,
 }: TaskFormProps) {
+  const { t } = useTranslation();
+
   return (
     <form className="task-form" onSubmit={onSubmit} noValidate>
       <div className="form-field">
-        <label htmlFor="title">Title</label>
+        <label htmlFor="title">{t("tasks.form.title")}</label>
         <input
           id="title"
           type="text"
           value={form.title}
           onChange={(e) => onChange("title", e.target.value)}
-          placeholder="Enter task title"
+          placeholder={t("tasks.form.titlePlaceholder")}
           aria-invalid={Boolean(errors.title)}
         />
         {errors.title && <span className="field-error">{errors.title}</span>}
       </div>
 
       <div className="form-field">
-        <label htmlFor="description">Description</label>
+        <label htmlFor="description">{t("tasks.form.description")}</label>
         <textarea
           id="description"
           value={form.description}
           onChange={(e) => onChange("description", e.target.value)}
-          placeholder="Enter task description"
+          placeholder={t("tasks.form.descriptionPlaceholder")}
           rows={4}
           aria-invalid={Boolean(errors.description)}
         />
@@ -67,7 +78,7 @@ export function TaskForm({
 
       <div className="form-row">
         <div className="form-field">
-          <label htmlFor="priority">Priority</label>
+          <label htmlFor="priority">{t("tasks.form.priority")}</label>
           <select
             id="priority"
             value={form.priority}
@@ -76,7 +87,7 @@ export function TaskForm({
           >
             {TASK_PRIORITIES.map((priority) => (
               <option key={priority} value={priority}>
-                {priority}
+                {t(`task.priority.${TASK_PRIORITY_I18N_KEY[priority]}`)}
               </option>
             ))}
           </select>
@@ -84,7 +95,7 @@ export function TaskForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor="status">Status</label>
+          <label htmlFor="status">{t("tasks.form.status")}</label>
           <select
             id="status"
             value={form.status}
@@ -93,7 +104,7 @@ export function TaskForm({
           >
             {TASK_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {status}
+                {t(`task.status.${TASK_STATUS_I18N_KEY[status]}`)}
               </option>
             ))}
           </select>
@@ -103,7 +114,7 @@ export function TaskForm({
 
       {showAssignee && (
         <div className="form-field">
-          <label htmlFor="assignedTo">Assignee</label>
+          <label htmlFor="assignedTo">{t("tasks.form.assignee")}</label>
           <AssigneeSelect
             value={form.assignedTo ?? ""}
             onChange={(v) => onChange("assignedTo", v)}
@@ -121,11 +132,11 @@ export function TaskForm({
       <div className="form-actions">
         {onCancel && (
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={submitting}>
-            Cancel
+            {t("common.cancel")}
           </button>
         )}
         <button type="submit" className="btn" disabled={submitting}>
-          {submitting ? "Saving..." : submitLabel}
+          {submitting ? t("common.saving") : submitLabel}
         </button>
       </div>
     </form>
@@ -135,7 +146,7 @@ export function TaskForm({
 export const defaultTaskForm: TaskFormState = {
   title: "",
   description: "",
-  priority: "Medium",
-  status: "Open",
+  priority: DEFAULT_TASK_PRIORITY,
+  status: DEFAULT_TASK_STATUS,
   assignedTo: "self",
 };

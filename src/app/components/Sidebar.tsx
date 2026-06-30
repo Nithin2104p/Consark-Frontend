@@ -1,31 +1,20 @@
 import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  Settings,
-  Target,
-  Menu,
-  X,
-  ListTodo,
-  CheckSquare,
-} from "lucide-react";
+import { LayoutDashboard, Users, Settings, Target, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { canAccess } from "../auth/permissions";
 import { useAuth } from "../auth/AuthContext";
 import { navItems, taskNavItems } from "../constants";
+import { MOBILE_BREAKPOINT } from "../constants/ui";
 import { useTranslation } from "../hooks/useTranslation";
 
 const icons = {
-  overview: LayoutDashboard,
   taskDashboard: LayoutDashboard,
-  taskList: ListTodo,
-  employees: Users,
-  projects: FileText,
   tasks: Target,
+  employees: Users,
   settings: Settings,
-  checkSquare: CheckSquare,
-};
+} as const;
+
+type NavItem = (typeof taskNavItems)[number] | (typeof navItems)[number];
 
 export function Sidebar() {
   const { t } = useTranslation();
@@ -34,22 +23,19 @@ export function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Sidebar should show only a single top-level item: Dashboard.
-  // Task-related navigation remains visible only when authenticated.
   const visibleNav = navItems.filter((item) => canAccess(role, item.id));
   const visibleTaskNav = isAuthenticated ? taskNavItems : [];
+  const allNavItems: NavItem[] = [...visibleTaskNav, ...visibleNav];
 
-
-
+  const closeOnMobile = () => {
+    if (isMobile) setIsOpen(false);
+  };
 
   return (
     <>
@@ -72,7 +58,6 @@ export function Sidebar() {
         />
       )}
 
-
       <aside className={`sidebar ${isMobile && isOpen ? "open" : ""}`}>
         <div className="brand">
           <div className="logo">{t("brand.initial")}</div>
@@ -80,44 +65,19 @@ export function Sidebar() {
         </div>
 
         <nav className="nav">
-          {visibleTaskNav.map((item) => {
+          {allNavItems.map((item) => {
             const Icon = icons[item.icon as keyof typeof icons];
+            const isConfig = item.id === "config";
 
             return (
               <NavLink
                 key={item.id}
                 to={item.path}
+                end={isConfig}
                 className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={() => isMobile && setIsOpen(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    isMobile && setIsOpen(false);
-                  }
-                }}
+                onClick={closeOnMobile}
               >
                 <Icon size={18} aria-hidden="true" />
-                {t(`nav.${item.id}`)}
-              </NavLink>
-            );
-          })}
-
-          {visibleNav.map((item) => {
-            const Icon = icons[item.icon as keyof typeof icons];
-            return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                end={true}
-                className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={() => isMobile && setIsOpen(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    isMobile && setIsOpen(false);
-                  }
-                }}
-              >
-                <Icon size={18} aria-hidden="true" />
-
                 {t(`nav.${item.id}`)}
               </NavLink>
             );

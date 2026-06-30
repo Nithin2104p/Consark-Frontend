@@ -1,17 +1,30 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { setUnauthorizedHandler } from "../services/client";
 import * as authService from "../services/auth.service";
+import { ROLES } from "./permissions";
+import { ROUTES } from "../constants/routes";
 import type { AuthUser, LoginCredentials, SignupCredentials } from "../types/auth";
 import type { AuthContextValue, Role } from "../types";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function applyAuthSession(
+  setToken: (token: string | null) => void,
+  setUser: (user: AuthUser | null) => void,
+  setRole: (role: Role) => void,
+  nextUser: AuthUser
+) {
+  setToken(authService.getStoredToken());
+  setUser(nextUser);
+  if (nextUser.role) {
+    setRole(nextUser.role);
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>(() => {
-    const stored = authService.getStoredUser();
-    return stored?.role ?? "superAdmin";
-  });
-  const [user, setUser] = useState<AuthUser | null>(() => authService.getStoredUser());
+  const storedUser = authService.getStoredUser();
+  const [role, setRole] = useState<Role>(() => storedUser?.role ?? ROLES.SUPER_ADMIN);
+  const [user, setUser] = useState<AuthUser | null>(() => storedUser);
   const [token, setToken] = useState<string | null>(() => authService.getStoredToken());
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -21,38 +34,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authService.logout();
     setToken(null);
     setUser(null);
-    setRole("superAdmin");
+    setRole(ROLES.SUPER_ADMIN);
   }, []);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      setToken(null);
-      setUser(null);
-      if (!window.location.pathname.startsWith("/")) {
-        window.location.assign("/");
-      }
+      logout();
+      window.location.assign(ROUTES.LOGIN);
     });
-    // setAuthLoading(false) after first paint to avoid cascading render warnings
     queueMicrotask(() => setAuthLoading(false));
-  }, []);
+  }, [logout]);
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const nextUser = await authService.login(credentials);
-    setToken(authService.getStoredToken());
-    setUser(nextUser);
-    if (nextUser.role) {
-      setRole(nextUser.role);
-    }
+    applyAuthSession(setToken, setUser, setRole, nextUser);
     return nextUser;
   }, []);
 
   const signup = useCallback(async (credentials: SignupCredentials) => {
     const nextUser = await authService.signup(credentials);
-    setToken(authService.getStoredToken());
-    setUser(nextUser);
-    if (nextUser.role) {
-      setRole(nextUser.role);
-    }
+    applyAuthSession(setToken, setUser, setRole, nextUser);
     return nextUser;
   }, []);
 

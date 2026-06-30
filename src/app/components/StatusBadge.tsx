@@ -1,4 +1,5 @@
-import type { TaskStatus } from "../types/task";
+import { useTranslation } from "../hooks/useTranslation";
+import { TASK_STATUS_I18N_KEY, type TaskStatus } from "../types/task";
 
 const statusClass: Record<TaskStatus, string> = {
   Open: "info",
@@ -11,5 +12,10 @@ type StatusBadgeProps = {
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  return <span className={`tag ${statusClass[status]}`}>{status}</span>;
+  const { t } = useTranslation();
+  return (
+    <span className={`tag ${statusClass[status]}`}>
+      {t(`task.status.${TASK_STATUS_I18N_KEY[status]}`)}
+    </span>
+  );
 }

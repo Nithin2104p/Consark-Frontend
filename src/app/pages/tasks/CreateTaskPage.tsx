@@ -6,12 +6,23 @@ import { createTask } from "../../services/task.service";
 import { getUsers, type UserDto } from "../../services/user.service";
 import { defaultTaskForm, TaskForm, type TaskFormState } from "./TaskForm";
 import { validateTaskForm } from "./validation";
+import { useTranslation } from "../../hooks/useTranslation";
+import { ASSIGNEE_PAGE_SIZE } from "../../constants/pagination";
+import { ROUTES } from "../../constants/routes";
 import type { TaskInput } from "../../types/task";
 import { useAuth } from "../../auth/AuthContext";
 import { hasPermission, PERMISSIONS } from "../../auth/permissions";
 import "./TasksPage.css";
 
+function mapAssignees(users: UserDto[]) {
+  return users.map((u) => ({
+    id: u._id,
+    name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
+  }));
+}
+
 export function CreateTaskPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { role, user } = useAuth();
   const [form, setForm] = useState<TaskFormState>(defaultTaskForm);
@@ -28,7 +39,7 @@ export function CreateTaskPage() {
   const loadAssignees = useCallback(async (page: number, search: string) => {
     setAssigneeLoading(true);
     try {
-      const res = await getUsers({ page, limit: 20, search: search || undefined });
+      const res = await getUsers({ page, limit: ASSIGNEE_PAGE_SIZE, search: search || undefined });
       setAssignees(res.users);
       setAssigneePage(res.pagination.page);
       setAssigneeTotalPages(res.pagination.totalPages);
@@ -42,10 +53,7 @@ export function CreateTaskPage() {
 
   useEffect(() => {
     if (!canAssign) return;
-    const timer = setTimeout(() => {
-      void loadAssignees(1, "");
-    }, 0);
-    return () => clearTimeout(timer);
+    void loadAssignees(1, "");
   }, [canAssign, loadAssignees]);
 
   const handleAssigneeLoadMore = useCallback(async () => {
@@ -53,7 +61,7 @@ export function CreateTaskPage() {
     const nextPage = assigneePage + 1;
     setAssigneeLoading(true);
     try {
-      const res = await getUsers({ page: nextPage, limit: 20, search: searchQuery || undefined });
+      const res = await getUsers({ page: nextPage, limit: ASSIGNEE_PAGE_SIZE, search: searchQuery || undefined });
       setAssignees((prev) => [...prev, ...res.users]);
       setAssigneePage(res.pagination.page);
       setAssigneeTotalPages(res.pagination.totalPages);
@@ -64,23 +72,24 @@ export function CreateTaskPage() {
     }
   }, [assigneeLoading, assigneePage, searchQuery]);
 
-  const handleAssigneeSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
-    void loadAssignees(1, query);
-  }, [loadAssignees]);
+  const handleAssigneeSearchChange = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      void loadAssignees(1, query);
+    },
+    [loadAssignees]
+  );
 
   const handleChange = (key: keyof TaskFormState, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
-    if (errors[key]) {
-      setErrors((current) => ({ ...current, [key]: "" }));
-    }
+    if (errors[key]) setErrors((current) => ({ ...current, [key]: "" }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const result = validateTaskForm(form);
     if (!result.valid || !result.data) {
-      setErrors(result.errors ?? { form: "Please fix the highlighted fields." });
+      setErrors(result.errors ?? { form: t("tasks.create.fixFields") });
       return;
     }
 
@@ -92,12 +101,12 @@ export function CreateTaskPage() {
         ...result.data,
         assignedTo: result.data.assignedTo === "self" && user ? user.id : result.data.assignedTo || undefined,
       } as TaskInput);
-      toast.success("Task created successfully.");
-      navigate("/tasks");
+      toast.success(t("tasks.create.success"));
+      navigate(ROUTES.TASKS);
     } catch (err) {
       const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ?? "Failed to create task."
-        : "Failed to create task.";
+        ? (err.response?.data as { message?: string })?.message ?? t("tasks.create.error")
+        : t("tasks.create.error");
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -108,8 +117,8 @@ export function CreateTaskPage() {
     <div className="tasks-page">
       <div className="tasks-header">
         <div>
-          <h1>Create Task</h1>
-          <p className="page-desc muted">Add a new task to your workspace</p>
+          <h1>{t("tasks.create.title")}</h1>
+          <p className="page-desc muted">{t("tasks.create.description")}</p>
         </div>
       </div>
 
@@ -118,12 +127,12 @@ export function CreateTaskPage() {
           form={form}
           errors={errors}
           submitting={submitting}
-          submitLabel="Create Task"
+          submitLabel={t("tasks.create.submit")}
           onChange={handleChange}
           onSubmit={handleSubmit}
-          onCancel={() => navigate("/tasks")}
+          onCancel={() => navigate(ROUTES.TASKS)}
           showAssignee={canAssign}
-          assignees={(Array.isArray(assignees) ? assignees : []).map((u) => ({ id: u._id, name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email }))}
+          assignees={mapAssignees(assignees)}
           assigneeLoading={assigneeLoading}
           assigneeHasMore={assigneePage < assigneeTotalPages}
           onAssigneeLoadMore={handleAssigneeLoadMore}
